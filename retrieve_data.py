@@ -3,55 +3,70 @@
 import os
 import pandas as pd
 
-def get_data_sample(csv_path, x_coord, y_coord):
+def get_data_sample(case_type, plane_number, field, x_coord, y_coord):
     """
-    Retrieve a single data sample from a CSV file, where:
-      - The first row holds X-coordinates (as column headers)
-      - The first column holds Y-coordinates (as row indices)
-    The interior cells contain the actual data (e.g. v-values).
-    
+    Retrieve a single data sample from a CSV file where:
+      - The first row (header) contains X-coordinates as columns.
+      - The first column (index) contains Y-coordinates as rows.
+      
     Parameters:
-        csv_path (str): Path to the CSV file
-        x_coord (float or int): X coordinate whose data you want
-        y_coord (float or int): Y coordinate whose data you want
-    
+        case_type   (str) : "clean" (CC) or "strips" (SC).
+        plane_number(int) : Which plane (1 through 25).
+        field       (str) : "u", "v", or "UV".
+        x_coord  (float)  : X coordinate for lookup.
+        y_coord  (float)  : Y coordinate for lookup.
+        
     Returns:
-        float: The requested value at (x_coord, y_coord)
+        float: The requested value from (x_coord, y_coord).
+    
+    Raises:
+        FileNotFoundError: If the expected CSV file does not exist.
+        ValueError       : If (x_coord, y_coord) is not found in the file.
     """
-
+    # Convert "clean" -> "CC" or "strips" -> "SC"
+    if case_type.lower() == "clean":
+        case_label = "CC"
+    elif case_type.lower() == "strips":
+        case_label = "SC"
+    else:
+        raise ValueError('Invalid case_type; must be either "clean" or "strips".')
+    
+    # Build the filename, e.g., "Case_CC_Span_3.txt_v.csv"
+    file_name = f"Case_{case_label}_Span_{plane_number}.txt_{field}.csv"
+    folder_path = "PIV_planes"  # Adjust if your folder structure differs
+    csv_path = os.path.join(folder_path, file_name)
+    
+    # Ensure the file exists
     if not os.path.isfile(csv_path):
         raise FileNotFoundError(f"File not found: {csv_path}")
-
-    # Read the CSV
-    #   - header=0 tells pandas the first row is column headers
-    #   - index_col=0 tells pandas the first column is the row index (Y-coordinates)
+    
+    # Read the CSV, with:
+    #   - header=0 so that the first row is used for column labels (X coords)
+    #   - index_col=0 so that the first column is used for the row index (Y coords)
     df = pd.read_csv(csv_path, header=0, index_col=0)
-
-    # Convert the column names (X-coordinates) to floats
+    
+    # Convert the column labels (X coords) to float
     df.columns = df.columns.astype(float)
-    # Convert the row index (Y-coordinates) to floats
+    # Convert the row labels (Y coords) to float
     df.index = df.index.astype(float)
-
-    # Attempt to retrieve the requested data cell
+    
+    # Retrieve the requested data cell
     try:
         return float(df.loc[y_coord, x_coord])
     except KeyError:
         raise ValueError(
-            f"Coordinates (x={x_coord}, y={y_coord}) not found in '{csv_path}'."
+            f"Coordinates (x={x_coord}, y={y_coord}) not found in {csv_path}."
         )
 
 def main():
-    # Example usage: Suppose the CSV is "PIV_planes/Case_CC_Span_1.txt_v.csv"
-    # and you want the data at x=117.189856, y=5.897608
-    csv_file = "PIV_planes/Case_CC_Span_2.txt_v.csv"
-    x_val = 117.946316
-    y_val = 7.564323
-    
+    # Example usage:
+    # "clean" -> "CC", plane = 1, field = "v",
+    # and we want the value at (x=117.189856, y=5.897608).
     try:
-        sample = get_data_sample(csv_file, x_val, y_val)
-        print(f"Data at (x={x_val}, y={y_val}): {sample}")
+        sample = get_data_sample("clean", 2, "v", 117.946316, 7.564323)
+        print("Retrieved Sample:", sample)
     except (FileNotFoundError, ValueError) as e:
-        print(e)
+        print("Error:", e)
 
 if __name__ == "__main__":
     main()
