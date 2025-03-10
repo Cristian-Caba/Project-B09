@@ -14,7 +14,7 @@ for file_path in folder_path.glob('*.txt'):  # For CSV files
 
     for i in range(60):
         rowindex.append(0)
-
+   
 
     for i in range(len(df)):
         if df.at[i,"X"] != a:
@@ -25,15 +25,21 @@ for file_path in folder_path.glob('*.txt'):  # For CSV files
         else:
             continue
 
-    matrix = np.zeros((len(rowindex),len(columnindex)))
+    matrixu = np.zeros((len(rowindex),len(columnindex)))
+
+    matrixv = np.zeros((len(rowindex),len(columnindex)))
+
+    matrixUV = np.zeros((len(rowindex),len(columnindex)))
 
 
 
-    datamatrixu = pd.DataFrame(matrix, index=rowindex, columns=columnindex)
 
-    datamatrixv = pd.DataFrame(matrix, index=rowindex, columns=columnindex)
 
-    datamatrixUV = pd.DataFrame(matrix, index=rowindex, columns=columnindex)
+    datamatrixu = pd.DataFrame(matrixu, index=rowindex, columns=columnindex)
+
+    datamatrixv = pd.DataFrame(matrixv, index=rowindex, columns=columnindex)
+
+    datamatrixUV = pd.DataFrame(matrixUV, index=rowindex, columns=columnindex)
 
 
     for i in columnindex:
@@ -52,6 +58,7 @@ for file_path in folder_path.glob('*.txt'):  # For CSV files
                 datamatrixu.at[j,i] = u
                 datamatrixv.at[j,i] = v
                 datamatrixUV.at[j,i] = math.sqrt(u**2+v**2)
+            print(datamatrixu.at[j,i],datamatrixv.at[j,i])
 
     print(datamatrixUV)
 
