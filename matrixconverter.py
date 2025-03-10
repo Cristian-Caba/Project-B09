@@ -1,4 +1,5 @@
 import pandas as pd
+import math
 import numpy as np
 from pathlib import Path
 
@@ -28,7 +29,11 @@ for file_path in folder_path.glob('*.txt'):  # For CSV files
 
 
 
-    datamatrix = pd.DataFrame(matrix, index=rowindex, columns=columnindex)
+    datamatrixu = pd.DataFrame(matrix, index=rowindex, columns=columnindex)
+
+    datamatrixv = pd.DataFrame(matrix, index=rowindex, columns=columnindex)
+
+    datamatrixUV = pd.DataFrame(matrix, index=rowindex, columns=columnindex)
 
 
     for i in columnindex:
@@ -36,14 +41,26 @@ for file_path in folder_path.glob('*.txt'):  # For CSV files
             u = df[(df['X'] == i) & (df['Y'] == j)]["U"].values[0]
             v = df[(df['X'] == i) & (df['Y'] == j)]["V"].values[0]
             if u == "NaN" or v == "NaN":
-                matrix[j,i] = 0
-            datamatrix.at[j,i] = math.sqrt(u**2+v**2)
-            print(df[(df['X'] == i) & (df['Y'] == j)]["U"].values[0])
+                datamatrixu.at[j,i] = 0
+                datamatrixv.at[j,i] = 0
+                datamatrixUV.at[j,i] = 0
+                if u != "NaN":
+                    datamatrixu.at[j,i] = u
+                elif v != "NaN":
+                    datamatrixv.at[j,i] = v
+            else:
+                datamatrixu.at[j,i] = u
+                datamatrixv.at[j,i] = v
+                datamatrixUV.at[j,i] = math.sqrt(u**2+v**2)
 
+    print(datamatrixUV)
 
+    file_pathu = str(file_path) + "_u.csv"
 
-    print(datamatrix)
+    file_pathv = str(file_path) + "_v.csv"
 
-    file_path = str(file_path) + ".csv"
+    file_pathUV = str(file_path) + "_UV.csv"
 
-    datamatrix.to_csv(file_path, index=True)
+    datamatrixu.to_csv(file_pathu, index=True)
+    datamatrixv.to_csv(file_pathv, index=True)
+    datamatrixUV.to_csv(file_pathUV, index=True)
