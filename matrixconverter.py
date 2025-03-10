@@ -40,13 +40,13 @@ for file_path in folder_path.glob('*.txt'):  # For CSV files
         for j in rowindex:
             u = df[(df['X'] == i) & (df['Y'] == j)]["U"].values[0]
             v = df[(df['X'] == i) & (df['Y'] == j)]["V"].values[0]
-            if math.isnan(str(u)) or math.isnan(str(v)):
+            if math.isnan(u) or math.isnan(v):
                 datamatrixu.at[j,i] = 0
                 datamatrixv.at[j,i] = 0
                 datamatrixUV.at[j,i] = 0
-                if math.isnan(str(u)) is False:
+                if math.isnan(u) is False:
                     datamatrixu.at[j,i] = u
-                elif math.isnan(str(v)) is False:
+                elif math.isnan(v) is False:
                     datamatrixv.at[j,i] = v
             else:
                 datamatrixu.at[j,i] = u
