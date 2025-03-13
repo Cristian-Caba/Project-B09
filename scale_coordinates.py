@@ -14,7 +14,7 @@ y_rev = list(reversed(y_crop))
 y_output = np.array(y_rev)
 y_output *= C_x
 
-y_scaled_file = r"Airfoil/y_scaled"
+y_scaled_file = r"Airfoil/y_scaled.txt"
 with open(y_scaled_file, "w") as fy:
     for y in y_output:
         fy.write(f"{y:.6f}\n")
