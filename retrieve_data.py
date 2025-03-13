@@ -63,7 +63,7 @@ def main():
     # "clean" -> "CC", plane = 1, field = "v",
     # and we want the value at (x=117.189856, y=5.897608).
     try:
-        sample = get_data_sample("clean", 2, "v", 117.946316, 7.564323)
+        sample = get_data_sample("clean", 1, "UV", 118.5767, 5.128355)
         print("Retrieved Sample:", sample)
     except (FileNotFoundError, ValueError) as e:
         print("Error:", e)
