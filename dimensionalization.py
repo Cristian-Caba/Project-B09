@@ -53,8 +53,28 @@ x_values = np.array(x_values)  # convert list to numpy array
 y_values = np.array(y_values)
 
 # Create fine x-grid for plotting
-x_fine = np.linspace(x_values.min(), x_values.max(), 500)
-y_fine = cs = cs = CubicSpline(x_values, y_values)(x_fine)
+x_fine = np.linspace(x_values.min(), 160, 100)
+y_fine = cs = CubicSpline(x_values, y_values)(x_fine)
+
+# calculate arc length to define s
+s_fine = np.zeros(x_fine.shape)  # Start with s = 0 at the first point
+dx = np.diff(x_fine)
+dy = np.diff(y_fine)
+ds = np.zeros(dx.shape)
+print(dx, dy)
+for i in range(len(dx)):
+    ds[i] = np.sqrt(dx[i]**2 + dy[i]**2)
+    #slope[i] = dy[i]/dx[i]
+    np.append(s_fine, (s_fine[i] + ds[i]))  # Cumulative sum
+#print(s_values)
+
+def convert_sx(s_grid):
+
+
+    x_grid = CubicSpline(x_fine, s_fine)(s_grid)
+
+
+    return
 
 # Plotting
 plt.figure(figsize=(10, 6))
