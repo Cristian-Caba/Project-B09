@@ -23,9 +23,9 @@ C_x = C_X * math.cos(Sweep)  #cos45
 
 
 # File paths
-x_file = r"C:\Users\Vladimir\.vscode\Project-B09\Airfoil\x_scaled.txt"
-y_file = r"C:\Users\Vladimir\.vscode\Project-B09\Airfoil\y.txt"
-s_file = r"C:\Users\Vladimir\.vscode\Project-B09\Airfoil\s_scaled.txt"
+x_file = r"Airfoil/x_scaled.txt"
+y_file = r"Airfoil/y_scaled.txt"
+s_file = r"Airfoil/s_scaled.txt"
 
 # Read x and y values
 # Load x-values completely
