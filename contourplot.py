@@ -6,6 +6,8 @@ import re
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
+from scipy.ndimage import gaussian_filter
+
 
 def main():
     folder_path = "PIV_planes"
@@ -42,13 +44,8 @@ def main():
             # Create a meshgrid for contour plotting
             X, Y = np.meshgrid(x_values, y_values)
 
-            Z[:, 0] = 0
-            Z[:, -1] = 0
-            Z[0, :] = 0
-            Z[-1, :] = 0
-
-            # Mask the zero values
-            Z_masked = np.ma.masked_where(Z == 0, Z)
+            mask = (Z == 0) & ((X < np.min(X) + 1) | (X > np.max(X) - 1))
+            Z_masked = np.ma.masked_where(mask, Z)
 
             # Start a new figure
             plt.figure()
