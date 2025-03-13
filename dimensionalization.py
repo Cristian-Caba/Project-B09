@@ -6,12 +6,11 @@ import matplotlib.pyplot as plt
 import scipy
 from scipy.interpolate import CubicSpline
 
-C_X = 1.2728 #meters
-Sweep = math.radians(45)
 
-#Convert global coordinate system chord length C_X to local system C_x_small 
-         
-C_x = C_X * math.cos(Sweep)  #cos45
+# Convert global coordinate system chord length C_X to local system C_x
+C_X = 1272.8  # milimeters
+Sweep = math.radians(45)        
+C_x = C_X * math.cos(Sweep)  # cos 45deg
 
 
 # interpolate airfoil coordinates as y(x/cx)
@@ -39,11 +38,6 @@ with open(y_file, "r") as fy:
         if idx >= len(x_values):  # Stop reading when reaching the end of x_values
             break
         y_values.append(float(line.strip()))
-
-
-# Convert y-values to local coordinates
-y_values = [y * C_x for y in y_values]  # Convert y-values to local coordinates
-
 
 
 # Ensure x and y have the same number of points
