@@ -42,9 +42,17 @@ def main():
             # Create a meshgrid for contour plotting
             X, Y = np.meshgrid(x_values, y_values)
 
+            Z[:, 0] = 0
+            Z[:, -1] = 0
+            Z[0, :] = 0
+            Z[-1, :] = 0
+
+            # Mask the zero values
+            Z_masked = np.ma.masked_where(Z == 0, Z)
+
             # Start a new figure
             plt.figure()
-            contour = plt.contourf(X, Y, Z)
+            contour = plt.contourf(X, Y, Z_masked)
             plt.colorbar(contour, label=color_label)
 
             plt.xlabel("X")
