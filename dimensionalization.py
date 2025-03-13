@@ -1,7 +1,10 @@
 import numpy as np
 import pandas as pd
 import math
-import interp1d 
+#import interp1d 
+import matplotlib.pyplot as plt
+import scipy
+from scipy.interpolate import CubicSpline
 
 C_X = 1.2728 #meters
 Sweep = math.radians(45)
@@ -20,42 +23,55 @@ C_x = C_X * math.cos(Sweep)  #cos45
 
 
 # File paths
-x_file = r"/Airfoil/x_scaled.txt"
-y_file = r"/Airfoil/y.txt"
-s_file = r"/Airfoil/s_scaled.txt"
+x_file = r"C:\Users\Vladimir\.vscode\Project-B09\Airfoil\x_scaled.txt"
+y_file = r"C:\Users\Vladimir\.vscode\Project-B09\Airfoil\y.txt"
+s_file = r"C:\Users\Vladimir\.vscode\Project-B09\Airfoil\s_scaled.txt"
 
 # Read x and y values
-with open(x_file, "r") as fx, open(y_file, "r") as fy:
+# Load x-values completely
+with open(x_file, "r") as fx:
     x_values = [float(line.strip()) for line in fx]
-    y_values = [float(line.strip()) for line in fy]
+
+# Load y-values only up to the length of x_values
+with open(y_file, "r") as fy:
+    y_values = []
+    for idx, line in enumerate(fy):
+        if idx >= len(x_values):  # Stop reading when reaching the end of x_values
+            break
+        y_values.append(float(line.strip()))
+
+
+# Convert y-values to local coordinates
+y_values = [y * C_x for y in y_values]  # Convert y-values to local coordinates
+
+
 
 # Ensure x and y have the same number of points
 if len(x_values) != len(y_values):
+    print(len(x_values), len(y_values))
     raise ValueError("x and y files must have the same number of values.")
 
-# Compute cumulative arc length s
-s_values = [0.0]  # Start with s = 0 at the first point
-for i in range(1, len(x_values)):
-    dx = x_values[i] - x_values[i - 1]
-    dy = y_values[i] - y_values[i - 1]
-    ds = math.sqrt(dx**2 + dy**2)  # Pythagorean theorem
-    s_values.append(s_values[-1] + ds)  # Cumulative sum
 
-# Write the s values to s.txt
-with open(s_file, "w") as fs:
-    for s in s_values:
-        fs.write(f"{s:.6f}\n")
+# Create cubic spline interpolation
+cs = CubicSpline(x_values, y_values)
 
-print(f"Cumulative distances saved to {s_file}")
+x_values = np.array(x_values)  # convert list to numpy array
+y_values = np.array(y_values)
 
+# Create fine x-grid for plotting
+x_fine = np.linspace(x_values.min(), x_values.max(), 500)
+y_fine = cs = cs = CubicSpline(x_values, y_values)(x_fine)
 
-# Ensure x and s have the same number of points
-if len(x_values) != len(s_values):
-    raise ValueError("x and s files must have the same number of values.")
-
-#interpolate S using x/cx as a base:
-
-interp_func = interp1d(x_values, s_values, kind='linear', fill_value="extrapolate")
+# Plotting
+plt.figure(figsize=(10, 6))
+plt.plot(x_values, y_values, 'o', label='Original points')
+plt.plot(x_fine, y_fine, '-', label='Cubic spline interpolation')
+plt.xlabel('x')
+plt.ylabel('y')
+plt.legend()
+plt.title('Cubic Spline Interpolation of Airfoil Coordinates')
+plt.grid(True)
+plt.show()
 
 
 
