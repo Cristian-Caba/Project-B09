@@ -60,7 +60,7 @@ for file_path in folder_path.glob('*.txt'):  # For CSV files
                 datamatrixUV.at[j,i] = math.sqrt(u**2+v**2)
             #print(datamatrixu.at[j,i],datamatrixv.at[j,i])
 
-    #print(datamatrixUV)
+    print(datamatrixUV)
 
     file_pathu = str(file_path) + "_u.csv"
 
