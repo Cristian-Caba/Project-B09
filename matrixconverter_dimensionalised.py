@@ -4,7 +4,7 @@ import numpy as np
 from pathlib import Path
 from dimensionalization import convert_sx
 
-folder_path = Path('PIV_planes/')
+folder_path = Path('PIV_planes_dimensionalised/')
 
 for file_path in folder_path.glob('*.txt'):  # For CSV files
     df = pd.read_csv(file_path, delimiter=" ",skiprows=1)
