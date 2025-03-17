@@ -2,22 +2,28 @@ import matplotlib.pyplot as plt
 import numpy as np
 np.set_printoptions(threshold=np.inf)
 from pathlib import Path
-for i in range (7,8):
-    file_path=Path('Project-B09/Vorticity')/f'Case_SC_Span_{i}.txt_vorticity.csv'
+fig, axes = plt.subplots(4, 6, figsize=(12, 18))
+axes = axes.flatten()
+for i in range (0,24):
+    file_path=Path('Project-B09/Vorticity')/f'Case_CC_Span_{i+1}.txt_vorticity.csv'
     with open(file_path) as file2:
         matrix=np.genfromtxt(file2, delimiter=',', filling_values=np.nan)
-    x=matrix[0][15:280]
-    y=matrix[30:,0]
-    z_sliced=matrix[230:,15:280]
+    x=matrix[0][1:]
+    y=matrix[1:,0]
+    z_sliced=matrix[1:,1:]
     nrrow=len(matrix)
     nrcol=len(matrix[1])
     X, Y = np.meshgrid(x, y)
-Z=z_sliced
+    Z=z_sliced
+    c = axes[i].contourf(X, Y, Z, levels=20, cmap='jet')
+    axes[i].set_title(f"Frame{i+1}")
+    axes[i].set_xlabel('Chord')
+    axes[i].set_ylabel('Height')
 plt.figure
 levels = np.linspace(np.min(Z), np.max(Z), 10)
-plt.contourf(X, Y, Z, levels=20,cmap='jet')
-plt.colorbar(label="DIng")  # Show color bar
-plt.xlabel("X-axis (excluding first row)")
-plt.ylabel("Y-axis (excluding first column)")
-plt.title("🔥 Contour Plot without First Row and Column 🔥")
+
+fig.colorbar(c, ax=axes, orientation='vertical', fraction=0.02, pad=0.04)
+plt.tight_layout()
+
+# Show the plot
 plt.show()
