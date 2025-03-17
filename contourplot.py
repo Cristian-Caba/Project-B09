@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
-# https://chatgpt.com/share/67d7d7bd-a9a4-8001-8c1c-e00e06264ab6
+
 import glob
 import os
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
+from subplots import create_subplots
 
 def main():
     folder_path = "PIV_planes"
@@ -30,9 +31,9 @@ def main():
             y_values = df.index.values
 
             # Boolean masks to select the data range:
-            # X in [120, 155] and Y in [0, 3.5]
+            # X in [120, 155] and Y in [0, 4]
             x_mask = (x_values >= 120) & (x_values <= 155)
-            y_mask = (y_values >= 0) & (y_values <= 3.5)
+            y_mask = (y_values >= 0) & (y_values <= 4)
 
             # Subset the DataFrame by position using .iloc
             df_sub = df.iloc[y_mask, x_mask]
@@ -58,6 +59,7 @@ def main():
             # Build meshgrid for plotting
             X_sub, Y_sub = np.meshgrid(x_sub, y_sub)
 
+            # Start a new figure
             plt.figure()
             contour = plt.contourf(X_sub, Y_sub, Z_sub, levels=50, vmin=vmin, vmax=vmax)
             plt.colorbar(contour, label=color_label)
@@ -69,7 +71,7 @@ def main():
 
             # Explicitly set the axis limits so they don't auto-scale
             plt.xlim([120, 155])
-            plt.ylim([0, 3.5])
+            plt.ylim([0, 4])
 
             # Construct an output image name
             base_no_ext = os.path.splitext(base_name)[0]
@@ -80,6 +82,13 @@ def main():
             plt.savefig(out_path, dpi=300, bbox_inches="tight")
             plt.close()
             print(f"Saved: {out_path}")
+
+    # Generate summary subplots
+    create_subplots(folder_path, "u", "CC")
+    create_subplots(folder_path, "v", "CC")
+    create_subplots(folder_path, "u", "SC")
+    create_subplots(folder_path, "v", "SC")
+
 
 if __name__ == "__main__":
     main()
