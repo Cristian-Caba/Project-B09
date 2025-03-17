@@ -4,24 +4,6 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 
-def block_average(U, V, nx_coarse, ny_coarse):
-    """Downsample the velocity field by averaging over blocks."""
-    nx, ny = U.shape
-    factor_x = nx // nx_coarse
-    factor_y = ny // ny_coarse
-
-    # Ensure the dimensions are divisible (crop excess if needed)
-    nx_trim = factor_x * nx_coarse
-    ny_trim = factor_y * ny_coarse
-    U_trimmed = U[:nx_trim, :ny_trim]
-    V_trimmed = V[:nx_trim, :ny_trim]
-
-    # Reshape and compute block averages
-    U_coarse = U_trimmed.reshape(nx_coarse, factor_x, ny_coarse, factor_y).mean(axis=(1, 3))
-    V_coarse = V_trimmed.reshape(nx_coarse, factor_x, ny_coarse, factor_y).mean(axis=(1, 3))
-
-    return U_coarse, V_coarse, factor_x, factor_y
-
 def main():
     folder_path = "PIV_planes_dimensionalised"
 
@@ -71,7 +53,7 @@ def main():
 
         # Plot the averaged velocity field with centered arrows
         plt.figure(figsize=(10, 10))
-        plt.quiver(x_values[::step], y_values, U[:,::step], V[:,::step], color="b")
+        plt.quiver(x_values[::step], y_values, U[:,::step], V[:,::step],W[:,::step], color="b")
         plt.xlabel("X")
         plt.ylabel("Y")
         plt.title(f"Velocity Field Plot of \n{base_clean}")
