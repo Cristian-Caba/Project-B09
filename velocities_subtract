@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 
 def subtract_and_plot(u_file_cc, u_file_sc, v_file_cc, v_file_sc,
                       out_folder="difference_images",
-                      x_min=120, x_max=155, y_min=0, y_max=4):
+                      x_min=120, x_max=155, y_min=0, y_max=3.5):
     """
     Reads CC and SC files for u and v velocities, subtracts them (SC - CC),
     restricts the domain to [x_min..x_max] x [y_min..y_max],
@@ -120,7 +120,7 @@ def main():
             u_file_cc, u_file_sc, v_file_cc, v_file_sc,
             out_folder=out_folder,
             x_min=120, x_max=155,
-            y_min=0, y_max=4
+            y_min=0, y_max=3.5
         )
 
 if __name__ == "__main__":
