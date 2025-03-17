@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-
+# https://chatgpt.com/share/67d7d7bd-a9a4-8001-8c1c-e00e06264ab6
 import glob
 import os
 import pandas as pd
@@ -30,9 +30,9 @@ def main():
             y_values = df.index.values
 
             # Boolean masks to select the data range:
-            # X in [120, 155] and Y in [0, 4]
+            # X in [120, 155] and Y in [0, 3.5]
             x_mask = (x_values >= 120) & (x_values <= 155)
-            y_mask = (y_values >= 0) & (y_values <= 4)
+            y_mask = (y_values >= 0) & (y_values <= 3.5)
 
             # Subset the DataFrame by position using .iloc
             df_sub = df.iloc[y_mask, x_mask]
@@ -69,7 +69,7 @@ def main():
 
             # Explicitly set the axis limits so they don't auto-scale
             plt.xlim([120, 155])
-            plt.ylim([0, 4])
+            plt.ylim([0, 3.5])
 
             # Construct an output image name
             base_no_ext = os.path.splitext(base_name)[0]
