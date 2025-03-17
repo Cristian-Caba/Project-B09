@@ -1,0 +1,127 @@
+#!/usr/bin/env python3
+
+import os
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+
+def subtract_and_plot(u_file_cc, u_file_sc, v_file_cc, v_file_sc,
+                      out_folder="difference_images",
+                      x_min=120, x_max=155, y_min=0, y_max=3.5):
+    """
+    Reads CC and SC files for u and v velocities, subtracts them (SC - CC),
+    restricts the domain, and plots the differences as contour plots 
+    (Δu = SC - CC, Δv = SC - CC) with *fixed color scales*:
+
+      Δu  in [-6.5,  3.5]
+      Δv  in [-0.5,  1.5]
+
+    Also takes the intersection of rows/columns if the data have different 
+    dimensions, ensuring no IndexError from length mismatches.
+    """
+    os.makedirs(out_folder, exist_ok=True)
+
+    # --- LOAD FILES ---
+    df_cc_u = pd.read_csv(u_file_cc, index_col=0)
+    df_sc_u = pd.read_csv(u_file_sc, index_col=0)
+    df_cc_v = pd.read_csv(v_file_cc, index_col=0)
+    df_sc_v = pd.read_csv(v_file_sc, index_col=0)
+
+    # Convert DataFrame index/columns to float
+    for df_ in [df_cc_u, df_sc_u, df_cc_v, df_sc_v]:
+        df_.index = df_.index.astype(float)
+        df_.columns = df_.columns.astype(float)
+
+    # --- FIND COMMON X AND Y ---
+    common_x_u = np.intersect1d(df_cc_u.columns, df_sc_u.columns)
+    common_x_v = np.intersect1d(df_cc_v.columns, df_sc_v.columns)
+    common_x = np.intersect1d(common_x_u, common_x_v)
+
+    common_y_u = np.intersect1d(df_cc_u.index, df_sc_u.index)
+    common_y_v = np.intersect1d(df_cc_v.index, df_sc_v.index)
+    common_y = np.intersect1d(common_y_u, common_y_v)
+
+    # --- APPLY DOMAIN LIMITS ---
+    x_domain = common_x[(common_x >= x_min) & (common_x <= x_max)]
+    y_domain = common_y[(common_y >= y_min) & (common_y <= y_max)]
+
+    # --- SUBSET ---
+    cc_u_sub = df_cc_u.loc[y_domain, x_domain]
+    sc_u_sub = df_sc_u.loc[y_domain, x_domain]
+    cc_v_sub = df_cc_v.loc[y_domain, x_domain]
+    sc_v_sub = df_sc_v.loc[y_domain, x_domain]
+
+    # --- DIFFERENCES (SC - CC) ---
+    diff_u = sc_u_sub.values - cc_u_sub.values
+    diff_v = sc_v_sub.values - cc_v_sub.values
+
+    # Create meshgrids for plotting
+    X, Y = np.meshgrid(x_domain, y_domain)
+
+    # Define contour levels so they're consistent across all plots
+    # Adjust the number of levels as you prefer
+    levels_u = np.linspace(-6.5, 3.5, 42)  # 42 steps from -6.5 to 3.5
+    levels_v = np.linspace(-0.5, 1.5, 42) # 42 steps from -0.5 to 1.5
+
+    # --- PLOT ΔU ---
+    plt.figure()
+    cont_u = plt.contourf(X, Y, diff_u, levels=levels_u, vmin=-6.5, vmax=3.5)
+    plt.colorbar(cont_u, label="ΔU (SC - CC)")
+    plt.xlabel("X")
+    plt.ylabel("Y")
+    plt.title(f"Difference in U Velocity\n{os.path.basename(u_file_sc)} (SC - CC)")
+    plt.xlim([x_min, x_max])
+    plt.ylim([y_min, y_max])
+
+    out_u_name = "difference_U_" + os.path.splitext(os.path.basename(u_file_sc))[0] + ".png"
+    out_u_path = os.path.join(out_folder, out_u_name)
+    plt.savefig(out_u_path, dpi=300, bbox_inches="tight")
+    plt.close()
+    print(f"Saved: {out_u_path}")
+
+    # --- PLOT ΔV ---
+    plt.figure()
+    cont_v = plt.contourf(X, Y, diff_v, levels=levels_v, vmin=-0.5, vmax=1.5)
+    plt.colorbar(cont_v, label="ΔV (SC - CC)")
+    plt.xlabel("X")
+    plt.ylabel("Y")
+    plt.title(f"Difference in V Velocity\n{os.path.basename(v_file_sc)} (SC - CC)")
+    plt.xlim([x_min, x_max])
+    plt.ylim([y_min, y_max])
+
+    out_v_name = "difference_V_" + os.path.splitext(os.path.basename(v_file_sc))[0] + ".png"
+    out_v_path = os.path.join(out_folder, out_v_name)
+    plt.savefig(out_v_path, dpi=300, bbox_inches="tight")
+    plt.close()
+    print(f"Saved: {out_v_path}")
+
+def main():
+    """
+    Generates difference plots (SC - CC) for all pairs of 
+    Case_CC_Span_i and Case_SC_Span_i, for i in [1..24].
+    The domain is fixed to x ∈ [120..155], y ∈ [0..4],
+    and the color scale for Δu and Δv is fixed across all plots.
+    """
+    folder = "PIV_planes"
+    out_folder = "difference_images"
+
+    for i in range(1, 25):
+        u_file_cc = os.path.join(folder, f"Case_CC_Span_{i}.txt_u.csv")
+        u_file_sc = os.path.join(folder, f"Case_SC_Span_{i}.txt_u.csv")
+        v_file_cc = os.path.join(folder, f"Case_CC_Span_{i}.txt_v.csv")
+        v_file_sc = os.path.join(folder, f"Case_SC_Span_{i}.txt_v.csv")
+
+        if not (os.path.isfile(u_file_cc) and os.path.isfile(u_file_sc)
+                and os.path.isfile(v_file_cc) and os.path.isfile(v_file_sc)):
+            print(f"Skipping Span {i}: one or more files not found.")
+            continue
+
+        subtract_and_plot(
+            u_file_cc, u_file_sc, v_file_cc, v_file_sc,
+            out_folder=out_folder,
+            x_min=120, x_max=155,
+            y_min=0, y_max=3.5
+        )
+
+if __name__ == "__main__":
+    main()

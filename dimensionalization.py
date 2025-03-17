@@ -24,7 +24,6 @@ C_x = C_X * math.cos(Sweep)  # cos 45deg
 # File paths
 x_file = r"Airfoil/x_scaled.txt"
 y_file = r"Airfoil/y_scaled.txt"
-s_file = r"Airfoil/s_scaled.txt"
 
 # Read x and y values
 # Load x-values completely
@@ -42,7 +41,6 @@ with open(y_file, "r") as fy:
 
 # Ensure x and y have the same number of points
 if len(x_values) != len(y_values):
-    print(len(x_values), len(y_values))
     raise ValueError("x and y files must have the same number of values.")
 
 
@@ -61,20 +59,23 @@ s_fine = np.zeros(x_fine.shape)  # Start with s = 0 at the first point
 dx = np.diff(x_fine)
 dy = np.diff(y_fine)
 ds = np.zeros(dx.shape)
-print(dx, dy)
+
 for i in range(len(dx)):
     ds[i] = np.sqrt(dx[i]**2 + dy[i]**2)
+    
     #slope[i] = dy[i]/dx[i]
-    np.append(s_fine, (s_fine[i] + ds[i]))  # Cumulative sum
-#print(s_values)
-
-def convert_sx(s_grid):
+    s_fine[i+1] = s_fine[i] + ds[i]  # Cumulative sum
 
 
+# Function converting array of s values to x/cx values
+def convert_sx(s_grid): 
+
+    # so that when plotting the s vector plugged in and x/cx vector returned
     x_grid = CubicSpline(x_fine, s_fine)(s_grid)
+    if sum(s_grid > 160):
+        print("s_grid out of interpolation range")
 
-
-    return
+    return x_grid/C_x
 
 # Plotting
 plt.figure(figsize=(10, 6))
@@ -85,7 +86,8 @@ plt.ylabel('y')
 plt.legend()
 plt.title('Cubic Spline Interpolation of Airfoil Coordinates')
 plt.grid(True)
-plt.show()
+#plt.show()
+#print(convert_sx(np.array([0, 1, 2, 110, 180])))
 
 
 
