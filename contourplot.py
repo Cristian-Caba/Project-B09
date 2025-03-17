@@ -5,7 +5,7 @@ import os
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
-from subplots import create_subplots
+from subplots_u_v import create_subplots
 
 def main():
     folder_path = "PIV_planes"
