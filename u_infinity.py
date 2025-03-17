@@ -5,7 +5,7 @@ import os
 import pandas as pd
 import numpy as np
 
-def compute_u_infinity(csv_file, y_target=4.0):
+def compute_u_infinity(csv_file, y_target=3.5):
     """
     Reads the given *_u.csv file, converts row/column labels to float,
     finds the row closest to y_target, and returns the mean (across x)
@@ -26,7 +26,7 @@ def compute_u_infinity(csv_file, y_target=4.0):
     row_data = df.loc[actual_y]
     return row_data.mean()
 
-def compute_u_inf_for_config_span(config, span_number, folder="PIV_planes", y_target=4.0):
+def compute_u_inf_for_config_span(config, span_number, folder="PIV_planes", y_target=3.5):
     """
     Constructs the filename for a given config ("CC" or "SC") and span_number (1..24).
     E.g.: "Case_CC_Span_1.txt_u.csv"

@@ -6,7 +6,7 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 
-def compute_u_infinity(csv_file, y_target=4.0):
+def compute_u_infinity(csv_file, y_target=3.5):
     """
     Reads the given *_u.csv file, converts row/column labels to float,
     finds the row closest to y_target, and returns the mean (across x)
@@ -31,7 +31,7 @@ def compute_u_infinity(csv_file, y_target=4.0):
 def plot_dimensionless(csv_file, u_inf, out_folder="dimensionless_images"):
     """
     Reads a CSV file (either *_u.csv or *_v.csv), divides all velocity values
-    by u_inf, restricts domain to x ∈ [120,155] and y ∈ [0,4],
+    by u_inf, restricts domain to x ∈ [120,155] and y ∈ [0,3.5],
     then creates a dimensionless contour plot (auto-scaled color limits).
     """
     df = pd.read_csv(csv_file, index_col=0)
@@ -45,7 +45,7 @@ def plot_dimensionless(csv_file, u_inf, out_folder="dimensionless_images"):
 
     # Domain mask
     x_mask = (x_vals >= 120) & (x_vals <= 155)
-    y_mask = (y_vals >= 0) & (y_vals <= 4)
+    y_mask = (y_vals >= 0) & (y_vals <= 3.5)
 
     # Subset by position using .iloc
     df_sub = df.iloc[y_mask, x_mask]
@@ -77,9 +77,9 @@ def plot_dimensionless(csv_file, u_inf, out_folder="dimensionless_images"):
     plt.ylabel("Y")
     plt.title(f"Dimensionless {velocity_label}\n{base_name}")
 
-    # Fix axes so they only show x ∈ [120,155] and y ∈ [0,4]
+    # Fix axes so they only show x ∈ [120,155] and y ∈ [0,3.5]
     plt.xlim([120, 155])
-    plt.ylim([0, 4])
+    plt.ylim([0, 3.5])
 
     # Save figure
     base_no_ext = os.path.splitext(base_name)[0]
@@ -93,8 +93,8 @@ def main():
     """
     Loops through each config 'CC' or 'SC' and span 1..24.
     1) Finds the file for the u-velocity (Case_<config>_Span_<i>.txt_u.csv).
-    2) Computes the free-stream velocity u_inf at y=4.
-    3) Plots the dimensionless u and v in the domain [120..155] x [0..4].
+    2) Computes the free-stream velocity u_inf at y=3.5.
+    3) Plots the dimensionless u and v in the domain [120..155] x [0..3.5].
     """
     # Adjust these if your folder or filenames differ
     folder = "PIV_planes"
@@ -113,7 +113,7 @@ def main():
                 continue
 
             # 1) Compute the free-stream velocity from the u-file
-            u_inf = compute_u_infinity(u_file, y_target=4.0)
+            u_inf = compute_u_infinity(u_file, y_target=3.5)
 
             # 2) Plot dimensionless u and v
             plot_dimensionless(u_file, u_inf, out_folder="dimensionless_images")
