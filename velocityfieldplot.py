@@ -47,34 +47,38 @@ def main():
         U = dfu.values
         V = dfv.values
 
+        # Define the Y cutoff value
+        y_cutoff = 4  # Adjust as needed
+
+        # Filter the DataFrames based on the Y index
+        dfu_filtered = dfu[dfu.index <= y_cutoff]
+        dfv_filtered = dfv[dfv.index <= y_cutoff]
+
+        # Get filtered Y values and velocity components
+        y_values = dfu_filtered.index.astype(float).values
+        x_values = dfu_filtered.columns.astype(float).values
+        U = dfu_filtered.values
+        V = dfv_filtered.values
+
+        U_normalised = U/(U**2+V**2)**0.5
+        V_normalised = V/(U**2+V**2)**0.5
+
         base_name = os.path.basename(csv_fileU)
         base_no_ext = os.path.splitext(base_name)[0]
-        base_clean = base_no_ext.replace(".txt_u", "")
+        base_clean = base_no_ext.replace(".txt_u", " ")
 
-        # Define coarser grid size (adjust as needed)
-        nx_coarse, ny_coarse = 20, 20  # Number of arrows in X and Y directions
-
-        # Compute block-averaged velocity components
-        U_avg, V_avg, factor_x, factor_y = block_average(U, V, nx_coarse, ny_coarse)
-
-        # Generate coarser X, Y grid (Centering arrows over bins)
-        x_bin_edges = np.linspace(x_values.min(), x_values.max(), nx_coarse + 1)
-        y_bin_edges = np.linspace(y_values.min(), y_values.max(), ny_coarse + 1)
-
-        x_coarse = (x_bin_edges[:-1] + x_bin_edges[1:]) / 2  # Midpoints in X
-        y_coarse = (y_bin_edges[:-1] + y_bin_edges[1:]) / 2  # Midpoints in Y
-        X_coarse, Y_coarse = np.meshgrid(x_coarse, y_coarse)
+        step = 15
 
         # Plot the averaged velocity field with centered arrows
-        plt.figure(figsize=(6, 6))
-        plt.quiver(X_coarse, Y_coarse, U_avg, V_avg, color="b", scale=200)
+        plt.figure(figsize=(10, 10))
+        plt.quiver(x_values[::step], y_values, U_normalised[:,::step], V_normalised[:,::step], color="b")
         plt.xlabel("X")
         plt.ylabel("Y")
-        plt.title(f"Velocity Field Plot of \n{base_clean}")
+        plt.title(f"Normalised Velocity Field Plot of \n{base_clean}")
         plt.grid()
 
         # Save the figure
-        out_image_name = base_no_ext + "_velocity_field.png"
+        out_image_name = base_no_ext + "_normalised_velocity_field.png"
         out_path = os.path.join(save_folder, out_image_name)
         plt.savefig(out_path, dpi=300, bbox_inches="tight")
         plt.close()
