@@ -68,13 +68,13 @@ for i in range(len(dx)):
     np.append(s_fine, (s_fine[i] + ds[i]))  # Cumulative sum
 #print(s_values)
 
-def convert_sx(s_grid):
+def convert_sx(s_grid): # so that when plotting the s vector plugged in and x/cx vector returned
 
 
     x_grid = CubicSpline(x_fine, s_fine)(s_grid)
 
 
-    return
+    return x_grid/C_x
 
 # Plotting
 plt.figure(figsize=(10, 6))
