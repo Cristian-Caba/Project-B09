@@ -1,9 +1,7 @@
 import numpy as np
 import pandas as pd
-import math
-#import interp1d 
+import math 
 import matplotlib.pyplot as plt
-import scipy
 from scipy.interpolate import CubicSpline
 
 
@@ -11,15 +9,6 @@ from scipy.interpolate import CubicSpline
 C_X = 1272.8  # milimeters
 Sweep = math.radians(45)        
 C_x = C_X * math.cos(Sweep)  # cos 45deg
-
-
-# interpolate airfoil coordinates as y(x/cx)
-
-
-
-# create s(x/cx) as the arc length of y(x/cx)
-
-
 
 # File paths
 x_file = r"Airfoil/x_scaled.txt"
@@ -87,7 +76,6 @@ plt.legend()
 plt.title('Cubic Spline Interpolation of Airfoil Coordinates')
 plt.grid(True)
 #plt.show()
-#print(convert_sx(np.array([0, 1, 2, 110, 180])))
 
 
 
