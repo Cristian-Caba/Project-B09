@@ -5,6 +5,9 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 
+# 1) Import the convert_sx function
+from dimensionalization import convert_sx
+
 def read_plane(u_file, v_file, x_min=120, x_max=155, y_min=0, y_max=4):
     """
     Reads the u and v files for a single plane, returns:
@@ -47,8 +50,8 @@ def read_plane(u_file, v_file, x_min=120, x_max=155, y_min=0, y_max=4):
     df_u_sub = df_u.loc[restricted_y, restricted_x].sort_index(axis=0).sort_index(axis=1)
     df_v_sub = df_v.loc[restricted_y, restricted_x].sort_index(axis=0).sort_index(axis=1)
 
-    x_vals = df_u_sub.columns.values
-    y_vals = df_u_sub.index.values
+    x_vals = df_u_sub.columns.values  # numeric array of X
+    y_vals = df_u_sub.index.values    # numeric array of Y
     u_data = df_u_sub.values
     v_data = df_v_sub.values
 
@@ -79,28 +82,34 @@ def plot_dw_dz(x_values, y_values, dw_dz, plane_label,
                dw_min=-2.5, dw_max=3.0):
     """
     Creates a contour plot of dw/dz on the interior domain with
-    a fixed color scale from dw_min to dw_max.
+    a fixed color scale from dw_min to dw_max, but dimensionless X.
     """
     os.makedirs(out_folder, exist_ok=True)
 
     # Because dw_dz is smaller by one row/column on each boundary:
-    x_inner = x_values[1:-1]
-    y_inner = y_values[1:-1]
+    #    x_inner, y_inner define the "inner" domain
+    x_inner = x_values[1:-1]  # shape (nx-2)
+    y_inner = y_values[1:-1]  # shape (ny-2)
 
-    X, Y = np.meshgrid(x_inner, y_inner)
+    # 2) Convert the X-axis to dimensionless chord fraction
+    #    MAKE SURE your x_inner is appropriate for convert_sx
+    x_inner_dimless = convert_sx(x_inner)
+
+    X_dim, Y_dim = np.meshgrid(x_inner_dimless, y_inner)
 
     # We define 50 levels between dw_min and dw_max for a consistent scale.
     levels = np.linspace(dw_min, dw_max, 51)
 
     plt.figure()
-    cont = plt.contourf(X, Y, dw_dz, levels=levels, vmin=dw_min, vmax=dw_max)
+    cont = plt.contourf(X_dim, Y_dim, dw_dz, levels=levels, vmin=dw_min, vmax=dw_max)
     plt.colorbar(cont, label="dw/dz")
-    plt.xlabel("X")
-    plt.ylabel("Y")
+    plt.xlabel("Dimensionless X (x / c)")
+    plt.ylabel("Y (mm)")
     plt.title(f"dw/dz for {plane_label}")
 
-    # Fix displayed x, y range to exactly show [x_inner.min..x_inner.max], etc.
-    plt.xlim([x_inner.min(), x_inner.max()])
+    # Fix displayed dimensionless X range
+    plt.xlim([x_inner_dimless.min(), x_inner_dimless.max()])
+    # Fix displayed Y range
     plt.ylim([y_inner.min(), y_inner.max()])
 
     out_name = f"dw_dz_{plane_label}.png"
@@ -114,7 +123,7 @@ def main():
     Loop over planes 1..24 for CC and SC configurations.
     Restrict domain to x in [120..155], y in [0..4].
     Compute dw/dz from continuity. Plot with a fixed color scale
-    from -2.5 to 3.0 in dw/dz.
+    from -2.5 to 3.0 in dw/dz, dimensionless X-axis.
     """
     folder = "PIV_planes"
     out_folder = "dw_dz_images"
@@ -139,7 +148,7 @@ def main():
             # Compute dw/dz
             dw_dz_array = compute_dw_dz(u_data, v_data, dx, dy)
 
-            # Plot with fixed color scale from -2.5 to 3
+            # Plot with dimensionless X
             plot_dw_dz(x_vals, y_vals, dw_dz_array, plane_label,
                        out_folder=out_folder,
                        dw_min=-2.5, dw_max=3.0)
