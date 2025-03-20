@@ -57,7 +57,7 @@ for i in range(len(dx)):
 
 
 # Function converting array of s values to x/cx values
-def convert_sx(s_grid): 
+def convert_sx(s_grid: np.ndarray) -> np.ndarray: 
 
     # so that when plotting the s vector plugged in and x/cx vector returned
     x_grid = CubicSpline(x_fine, s_fine)(s_grid)
