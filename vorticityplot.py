@@ -2,6 +2,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 np.set_printoptions(threshold=np.inf)
 from pathlib import Path
+vmin=9999999.3
+vmax=-80000.3
 fig, axes = plt.subplots(4, 6, figsize=(12, 18))
 axes = axes.flatten()
 ccsc="CC"
@@ -37,10 +39,10 @@ for i in range (0,24):
     axes[i].set_xlabel('Chord')
     axes[i].set_ylabel('Height')
 plt.figure
-levels = np.linspace(np.min(Z), np.max(Z), 10)
+levels = np.linspace(vmin, vmax, 10)
 
 fig.colorbar(c, ax=axes, orientation='vertical', fraction=0.02, pad=0.04)
 plt.tight_layout()
 
-# Show the plot
+# Show the plot
 plt.show()
