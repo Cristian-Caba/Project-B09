@@ -4,11 +4,10 @@ import math
 import matplotlib.pyplot as plt
 from scipy.interpolate import CubicSpline
 
+import scale_coordinates
 
-# Convert global coordinate system chord length C_X to local system C_x
-C_X = 1800  # milimeters
-Sweep = math.radians(45)        
-C_x = C_X * math.cos(Sweep)  # cos 45deg
+# get C_x
+C_x = scale_coordinates.C_x
 
 # File paths
 x_file = r"Airfoil/x_scaled.txt"
@@ -40,14 +39,15 @@ x_values = np.array(x_values)  # convert list to numpy array
 y_values = np.array(y_values)
 
 # Create fine x-grid for plotting
-x_fine = np.linspace(x_values.min(), 160, 100)
-y_fine = cs = CubicSpline(x_values, y_values)(x_fine)
+x_fine = np.linspace(0, 160, 100)
+y_fine = cs(x_fine)
 
 # calculate arc length to define s
 s_fine = np.zeros(x_fine.shape)  # Start with s = 0 at the first point
 dx = np.diff(x_fine)
 dy = np.diff(y_fine)
 ds = np.zeros(dx.shape)
+
 
 for i in range(len(dx)):
     ds[i] = np.sqrt(dx[i]**2 + dy[i]**2)
@@ -60,7 +60,7 @@ for i in range(len(dx)):
 def convert_sx(s_grid: np.ndarray) -> np.ndarray: 
 
     # so that when plotting the s vector plugged in and x/cx vector returned
-    x_grid = CubicSpline(x_fine, s_fine)(s_grid)
+    x_grid = CubicSpline(s_fine,x_fine)(s_grid)
     if sum(s_grid > 160):
         print("s_grid out of interpolation range")
 
