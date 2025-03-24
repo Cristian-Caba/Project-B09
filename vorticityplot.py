@@ -8,10 +8,10 @@ fig, axes = plt.subplots(4, 6, figsize=(12, 18))
 axes = axes.flatten()
 ccsc="SC"
 
-vmin=0
-vmax=0
+cmin=0
+cmax=0
 for i in range (0,24):
-    file_path=Path('Project-B09/Vorticity')/f'Case_{ccsc}_Span_{i+1}.txt_vorticity.csv'
+    file_path=Path('Vorticity')/f'Case_{ccsc}_Span_{i+1}.txt_vorticity.csv'
     with open(file_path) as file2:
         matrix=np.genfromtxt(file2, delimiter=',', filling_values=np.nan)
     z_sliced=matrix[1:,1:]
@@ -22,7 +22,7 @@ if vmax<np.max(Z):
         vmax=np.max(Z)     
 
 for i in range (0,24):
-    file_path=Path('Project-B09/Vorticity')/f'Case_{ccsc}_Span_{i+1}.txt_vorticity.csv'
+    file_path=Path('Vorticity')/f'Case_{ccsc}_Span_{i+1}.txt_vorticity.csv'
     with open(file_path) as file2:
         matrix=np.genfromtxt(file2, delimiter=',', filling_values=np.nan)
     x=matrix[0][1:]
@@ -34,10 +34,12 @@ for i in range (0,24):
     nrcol=len(matrix[1])
     X, Y = np.meshgrid(xdimension, y)
     Z=z_sliced
-    c = axes[i].contourf(X, Y, Z, levels=50, cmap='jet',vmin=vmin,vmax=vmax)
+    c = axes[i].contourf(X, Y, Z, levels=50, cmap='jet',vmin=cmin,vmax=cmax)
     axes[i].set_title(f"Frame{i+1}")
     axes[i].set_xlabel('Chord')
     axes[i].set_ylabel('Height')
+    axes[i].set_xlim(120,140)
+    axes[i].set_ylim(0,3)
 plt.figure
 levels = np.linspace(vmin, vmax, 10)
 

@@ -12,6 +12,8 @@ data_folder = "PIV_planes"
 # List of plane files (Assuming sorted order corresponds to increasing z positions)
 plane_files_U = sorted(glob.glob(f"{data_folder}/Case_CC_Span_*_u.csv"))  # U component files
 plane_files_V = sorted(glob.glob(f"{data_folder}/Case_CC_Span_*_v.csv"))  # V component files
+plane_files_Us = sorted(glob.glob(f"{data_folder}/Case_SC_Span_*_u.csv"))  # U component files
+plane_files_Vs = sorted(glob.glob(f"{data_folder}/Case_SC_Span_*_v.csv"))  # V component files
 z_positions = np.linspace(0, len(plane_files_U) - 1, len(plane_files_U))  # Define Z positions
 
 # Lists to store 3D velocity field
@@ -31,29 +33,52 @@ for file_V in plane_files_V:
     x_sets.append(set(dfv.columns.astype(float)))
     y_sets.append(set(dfv.index.astype(float)))
 
-# Find common X and Y values across all files
-common_x_values = sorted(set.intersection(*x_sets))
-common_y_values = sorted(set.intersection(*y_sets))
+for file_Us in plane_files_Us:
+    dfus = pd.read_csv(file_Us, index_col=0)
+    x_sets.append(set(dfu.columns.astype(float)))
+    y_sets.append(set(dfu.index.astype(float)))
+
+for file_Vs in plane_files_Vs:
+    dfvs = pd.read_csv(file_Vs, index_col=0)
+    x_sets.append(set(dfv.columns.astype(float)))
+    y_sets.append(set(dfv.index.astype(float)))
+
+# Define your desired range
+x_min, x_max = 120, 155  # Adjust these values as needed
+y_min, y_max = 0, 3.5   # Adjust these values as needed
+
+# Filter and sort the common x and y values within the range
+common_x_values = sorted([x for x in set.intersection(*x_sets) if x_min <= x <= x_max])
+common_y_values = sorted([y for y in set.intersection(*y_sets) if y_min <= y <= y_max])
+
 
 # Step 2: Read and stack all planes with consistent shapes
-for i, (file_U, file_V) in enumerate(zip(plane_files_U, plane_files_V)):
+for i, (file_U,file_Us, file_V,file_Vs) in enumerate(zip(plane_files_U,plane_files_Us, plane_files_V,plane_files_Vs)):
     dfu = pd.read_csv(file_U, index_col=0)
     dfv = pd.read_csv(file_V, index_col=0)
+    dfus = pd.read_csv(file_Us, index_col=0)
+    dfvs = pd.read_csv(file_Vs, index_col=0)
 
     # Convert index (Y) and columns (X) to float
     dfu.index = dfu.index.astype(float)
     dfu.columns = dfu.columns.astype(float)
     dfv.index = dfv.index.astype(float)
     dfv.columns = dfv.columns.astype(float)
+    dfus.index = dfus.index.astype(float)
+    dfus.columns = dfus.columns.astype(float)
+    dfvs.index = dfvs.index.astype(float)
+    dfvs.columns = dfvs.columns.astype(float)
 
     # Reindex to ensure consistent shape
     dfu = dfu.reindex(index=common_y_values, columns=common_x_values, fill_value=0)
     dfv = dfv.reindex(index=common_y_values, columns=common_x_values, fill_value=0)
+    dfus = dfus.reindex(index=common_y_values, columns=common_x_values, fill_value=0)
+    dfvs = dfvs.reindex(index=common_y_values, columns=common_x_values, fill_value=0)
 
     # Convert DataFrame to NumPy arrays
-    U_list.append(dfu.values)
-    V_list.append(dfv.values)
-    W_list.append(np.zeros_like(dfu.values))  # Assuming W = 0 unless given
+    U_list.append(dfus.values) # U_list.append(dfus.values-dfu.values)
+    V_list.append(dfvs.values) # V_list.append(dfvs.values-dfv.values)
+    W_list.append(dfvs.values) # W_list.append((dfus.values-dfu.values)**0.5)  # Assuming W = 0 unless given
 
 # Stack along the Z dimension
 U_3D = np.stack(U_list, axis=-1)  # Shape (Y, X, Z)
@@ -69,7 +94,7 @@ Y,X,Z = np.meshgrid(y_values,x_values,z_positions,indexing="ij")
 
 # Plot settings
 stepx = 30
-stepy = 10
+stepy = 5
 
 print(np.shape(U_3D))
 
@@ -81,7 +106,7 @@ ax = fig.add_subplot(111, projection="3d")
 
 print(np.shape(U_3D[::stepy,::stepx,:]))
 
-ax.quiver(Y[::stepy,::stepx,:],X[::stepy,::stepx,:], Z[::stepy,::stepx,:], V_3D[::stepy,::stepx,:],U_3D[::stepy,::stepx,:], W_3D[::stepy,::stepx,:],length=0.2)
+ax.quiver(Y[::stepy,::stepx,:],X[::stepy,::stepx,:], Z[::stepy,::stepx,:], V_3D[::stepy,::stepx,:],U_3D[::stepy,::stepx,:], W_3D[::stepy,::stepx,:],length=0.01)
 ax.set_xlabel("Y")
 ax.set_ylabel("X")
 ax.set_zlabel("Z")
