@@ -1,7 +1,7 @@
 import numpy as np
 import math 
 
-C_X = 1272.8  # milimeters
+C_X = 1800  # milimeters
 Sweep = math.radians(45)
 C_x = C_X * math.cos(Sweep)
 
