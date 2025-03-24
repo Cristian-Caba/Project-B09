@@ -89,7 +89,7 @@ def calculate_boundary_layer_quantities(y, u, Ue):
 
     return delta_star, theta
 
-
+# Cap on max y coordinate for accuracy reasons
 y_target = 3.5
 
 #IS THIS DIMENSIONALISED OR NOT?
@@ -110,9 +110,6 @@ print(actual_y)
 
 
 
-
-
-
 for span in range(1, 25):
     # Use the helper function to get Ue for each span
     Ue = compute_u_inf_for_config_span("CC", span)
@@ -129,9 +126,6 @@ for span in range(1, 25):
     delta_star, theta = calculate_boundary_layer_quantities(y, u, Ue)
 
     print(f"Span {span}: Displacement thickness δ* (SC) = {delta_star:.4f}")
-
-
-
 
 
 # End of Boundary_Layer_Characterization.py
