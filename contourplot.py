@@ -127,8 +127,8 @@ def main():
 
             # MARKED CHANGE: Simply fix the color scale + 'bwr' colormap
             # Example: from -2.5 to +3.0
-            vmin = -2.5
-            vmax = 3.0
+            vmin = 0
+            vmax = 1
 
             plt.figure()
             contour = plt.contourf(
