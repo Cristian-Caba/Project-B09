@@ -77,8 +77,8 @@ for i, (file_U,file_Us, file_V,file_Vs) in enumerate(zip(plane_files_U,plane_fil
 
     # Convert DataFrame to NumPy arrays
     U_list.append(dfus.values) # U_list.append(dfus.values-dfu.values)
-    V_list.append(dfus.values) # V_list.append(dfvs.values-dfv.values)
-    W_list.append(dfus.values) # W_list.append((dfus.values-dfu.values)**0.5)  # Assuming W = 0 unless given
+    V_list.append(dfvs.values) # V_list.append(dfvs.values-dfv.values)
+    W_list.append(dfvs.values) # W_list.append((dfus.values-dfu.values)**0.5)  # Assuming W = 0 unless given
 
 # Stack along the Z dimension
 U_3D = np.stack(U_list, axis=-1)  # Shape (Y, X, Z)
