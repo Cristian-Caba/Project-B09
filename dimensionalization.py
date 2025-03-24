@@ -6,7 +6,7 @@ from scipy.interpolate import CubicSpline
 
 
 # Convert global coordinate system chord length C_X to local system C_x
-C_X = 1800  # milimeters
+C_X = 1272.8  # milimeters
 Sweep = math.radians(45)        
 C_x = C_X * math.cos(Sweep)  # cos 45deg
 
@@ -49,6 +49,8 @@ dx = np.diff(x_fine)
 dy = np.diff(y_fine)
 ds = np.zeros(dx.shape)
 
+print(dx,dy)
+
 for i in range(len(dx)):
     ds[i] = np.sqrt(dx[i]**2 + dy[i]**2)
     
@@ -75,7 +77,7 @@ plt.ylabel('y')
 plt.legend()
 plt.title('Cubic Spline Interpolation of Airfoil Coordinates')
 plt.grid(True)
-#plt.show()
+plt.show()
 
 
 
