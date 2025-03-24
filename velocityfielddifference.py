@@ -3,8 +3,6 @@ import numpy as np
 import glob
 import os
 import matplotlib.pyplot as plt
-from mpl_toolkits.mplot3d import Axes3D
-
 
 # Folder containing all plane files
 data_folder = "PIV_planes"
@@ -14,10 +12,9 @@ plane_files_U = sorted(glob.glob(f"{data_folder}/Case_CC_Span_*_u.csv"))  # U co
 plane_files_V = sorted(glob.glob(f"{data_folder}/Case_CC_Span_*_v.csv"))  # V component files
 plane_files_Us = sorted(glob.glob(f"{data_folder}/Case_SC_Span_*_u.csv"))  # U component files
 plane_files_Vs = sorted(glob.glob(f"{data_folder}/Case_SC_Span_*_v.csv"))  # V component files
-z_positions = np.linspace(0, len(plane_files_U) - 1, len(plane_files_U))  # Define Z positions
 
 # Lists to store 3D velocity field
-U_list, V_list, W_list = [], [], []
+U_list, V_list = [], []
 
 # Step 1: Find common X and Y values across all planes
 x_sets = []
@@ -53,11 +50,17 @@ common_y_values = sorted([y for y in set.intersection(*y_sets) if y_min <= y <= 
 
 
 # Step 2: Read and stack all planes with consistent shapes
-for i, (file_U,file_Us, file_V,file_Vs) in enumerate(zip(plane_files_U,plane_files_Us, plane_files_V,plane_files_Vs)):
-    dfu = pd.read_csv(file_U, index_col=0)
-    dfv = pd.read_csv(file_V, index_col=0)
-    dfus = pd.read_csv(file_Us, index_col=0)
-    dfvs = pd.read_csv(file_Vs, index_col=0)
+for i in range(len(plane_files_U)):
+    dfu = []
+    dfv = []
+    dfus = []
+    dfvs = []
+    U_2D = []
+    V_2D = []
+    dfu = pd.read_csv(plane_files_U[i], index_col=0)
+    dfv = pd.read_csv(plane_files_V[i], index_col=0)
+    dfus = pd.read_csv(plane_files_Us[i], index_col=0)
+    dfvs = pd.read_csv(plane_files_Vs[i], index_col=0)
 
     # Convert index (Y) and columns (X) to float
     dfu.index = dfu.index.astype(float)
@@ -76,48 +79,34 @@ for i, (file_U,file_Us, file_V,file_Vs) in enumerate(zip(plane_files_U,plane_fil
     dfvs = dfvs.reindex(index=common_y_values, columns=common_x_values, fill_value=0)
 
     # Convert DataFrame to NumPy arrays
-    U_list.append(dfus.values-dfu.values)
-    V_list.append(dfvs.values-dfv.values)
-    W_list.append((dfus.values-dfu.values)**0.5)  # Assuming W = 0 unless given
-
-# Stack along the Z dimension
-U_3D = np.stack(U_list, axis=-1)  # Shape (Y, X, Z)
-V_3D = np.stack(V_list, axis=-1)
-W_3D = np.stack(W_list, axis=-1)
+    U_2D.append(dfus.values-dfu.values)
+    V_2D.append(dfvs.values-dfv.values)
 
 
-# Get X and Y values from the first plane
-x_values = np.array(common_x_values)
-y_values = np.array(common_y_values)
+    # Get X and Y values from the first plane
+    x_values = np.array(common_x_values)
+    y_values = np.array(common_y_values)
 
-Y,X,Z = np.meshgrid(y_values,x_values,z_positions,indexing="ij")
+    X,Y = np.meshgrid(x_values,y_values)
 
-# Plot settings
-stepx = 15
-stepy = 1
+    # Plot settings
+    stepx = 15
+    stepy = 1
 
-print(np.shape(U_3D))
+    print(X.shape,Y.shape)
 
-print(len(y_values),len(x_values),len(z_positions))
+    # Plot the averaged velocity field with centered arrows
+    plt.figure(figsize=(10, 10))
+    plt.quiver(X[::stepy, ::stepx], Y[::stepy, ::stepx], U_2D[0][::stepy, ::stepx], V_2D[0][::stepy, ::stepx], color="b")
+    plt.xlabel("X")
+    plt.ylabel("Y")
+    plt.title(f"Velocity Field Plot of \n{plane_files_U[i]}")
+    plt.grid()
 
 
-fig = plt.figure(figsize=(10, 10))
-ax = fig.add_subplot(111, projection="3d")
+    # Save the figure
+    out_image_name = f"{plane_files_U[i]}.csv_difference_velocity_field.png"
+    plt.savefig(out_image_name, dpi=300, bbox_inches="tight")
+    plt.close()
 
-print(np.shape(U_3D[::stepy,::stepx,:]))
-
-ax.quiver(Y[::stepy,::stepx,:],X[::stepy,::stepx,:], Z[::stepy,::stepx,:], V_3D[::stepy,::stepx,:],U_3D[::stepy,::stepx,:], W_3D[::stepy,::stepx,:])
-ax.set_xlabel("Y")
-ax.set_ylabel("X")
-ax.set_zlabel("Z")
-ax.set_title("Velocity Field Plot")
-ax.grid()
-plt.show()
-
-# Save image
-out_image_name = "3D_velocity_field.png"
-out_path = os.path.join(out_image_name)
-plt.savefig(out_path, dpi=300, bbox_inches="tight")
-plt.close()
-
-print(f"Saved: {out_path}")
+    print(f"Saved: {out_image_name}")
