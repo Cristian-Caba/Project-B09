@@ -46,7 +46,7 @@ def main():
     folder_path = "PIV_planes"
 
     # Patterns for _u.csv, _v.csv, _UV.csv
-    file_patterns = ["*_u.csv", "*_v.csv", "*_UV.csv"]
+    file_patterns = ["*_u.csv", "*_v.csv"]
 
     # Subfolder for dimensionless images
     save_folder = os.path.join(folder_path, "images_dimless_x")
@@ -55,6 +55,10 @@ def main():
     # Restrict domain
     x_min, x_max = 120, 155
     y_min, y_max = 0, 4
+
+    min_max_uv = [[0,1], [-0.12, 0]]
+
+    i = 0
 
     for pattern in file_patterns:
         search_pattern = os.path.join(folder_path, pattern)
@@ -127,8 +131,6 @@ def main():
 
             # MARKED CHANGE: Simply fix the color scale + 'bwr' colormap
             # Example: from -2.5 to +3.0
-            vmin = 0
-            vmax = 1
 
             plt.figure()
             contour = plt.contourf(
@@ -137,8 +139,8 @@ def main():
                 dimZ_sub,
                 levels=50,
                 cmap='bwr',    # Blue-White-Red scheme
-                vmin=vmin,     # Lower limit
-                vmax=vmax      # Upper limit
+                vmin=float(min_max_uv[i][0]),     # Lower limit
+                vmax=float(min_max_uv[i][1])      # Upper limit
             )
             plt.colorbar(contour, label=f"{raw_label}/u∞(x)")
 
@@ -157,6 +159,8 @@ def main():
             plt.savefig(out_path, dpi=300, bbox_inches="tight")
             plt.close()
             print(f"Saved dimensionless velocity + dimensionless X plot: {out_path}")
+        i += 1
+
 
 if __name__ == "__main__":
     main()
