@@ -1,6 +1,11 @@
 import numpy as np
 import math 
 
+# Convert global coordinate system chord length C_X to local system C_x
+C_X = 1272.8  # milimeters
+Sweep = math.radians(45)        
+C_x = C_X * math.cos(Sweep)  # cos 45deg
+
 C_X = 1272.8  # milimeters
 Sweep = math.radians(45)
 C_x = C_X * math.cos(Sweep)
