@@ -58,6 +58,13 @@ def main():
 
     min_max_uv = [[0,1], [-0.12, 0]]
 
+    from matplotlib.colors import LinearSegmentedColormap
+
+    red_white_cmap = LinearSegmentedColormap.from_list("red_white", ["white", "red"])
+    blue_white_cmap = LinearSegmentedColormap.from_list("blue_white", ["blue", "white"])
+
+    cmaps = [red_white_cmap, blue_white_cmap]
+
     i = 0
 
     for pattern in file_patterns:
@@ -131,14 +138,13 @@ def main():
 
             # MARKED CHANGE: Simply fix the color scale + 'bwr' colormap
             # Example: from -2.5 to +3.0
-
             plt.figure()
             contour = plt.contourf(
                 X_mesh,
                 Y_mesh,
                 dimZ_sub,
                 levels=50,
-                cmap='bwr',    # Blue-White-Red scheme
+                cmap=cmaps[i],    # Blue-White-Red scheme
                 vmin=float(min_max_uv[i][0]),     # Lower limit
                 vmax=float(min_max_uv[i][1])      # Upper limit
             )
