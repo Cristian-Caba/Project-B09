@@ -78,7 +78,7 @@ for i, (file_U,file_Us, file_V,file_Vs) in enumerate(zip(plane_files_U,plane_fil
     # Convert DataFrame to NumPy arrays
     U_list.append(dfus.values) # U_list.append(dfus.values-dfu.values)
     V_list.append(dfvs.values) # V_list.append(dfvs.values-dfv.values)
-    W_list.append(dfvs.values) # W_list.append((dfus.values-dfu.values)**0.5)  # Assuming W = 0 unless given
+    W_list.append(np.zeros_like(dfus.values)) # W_list.append((dfus.values-dfu.values)**0.5)  # Assuming W = 0 unless given
 
 # Stack along the Z dimension
 U_3D = np.stack(U_list, axis=-1)  # Shape (Y, X, Z)
@@ -96,17 +96,13 @@ Y,X,Z = np.meshgrid(y_values,x_values,z_positions,indexing="ij")
 stepx = 30
 stepy = 5
 
-print(np.shape(U_3D))
-
-print(len(y_values),len(x_values),len(z_positions))
-
 
 fig = plt.figure(figsize=(10, 10))
 ax = fig.add_subplot(111, projection="3d")
 
 print(np.shape(U_3D[::stepy,::stepx,:]))
 
-ax.quiver(Y[::stepy,::stepx,:],X[::stepy,::stepx,:], Z[::stepy,::stepx,:], V_3D[::stepy,::stepx,:],U_3D[::stepy,::stepx,:], W_3D[::stepy,::stepx,:],length=0.01)
+ax.quiver(Y[::stepy,::stepx,:],X[::stepy,::stepx,:], Z[::stepy,::stepx,:], V_3D[::stepy,::stepx,:],U_3D[::stepy,::stepx,:], W_3D[::stepy,::stepx,:],length=0.1)
 ax.set_xlabel("Y")
 ax.set_ylabel("X")
 ax.set_zlabel("Z")

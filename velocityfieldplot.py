@@ -53,7 +53,7 @@ def main():
 
         # Plot the averaged velocity field with centered arrows
         plt.figure(figsize=(10, 10))
-        plt.quiver(x_values[::step], y_values, U[:,::step], V[:,::step],W[:,::step], color="b")
+        plt.quiver(x_values[::step], y_values, U[:,::step], V[:,::step], color="b")
         plt.xlabel("X")
         plt.ylabel("Y")
         plt.title(f"Velocity Field Plot of \n{base_clean}")

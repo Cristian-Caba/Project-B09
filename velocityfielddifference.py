@@ -5,7 +5,7 @@ import os
 import matplotlib.pyplot as plt
 
 # Folder containing all plane files
-data_folder = "PIV_planes"
+data_folder = "PIV_planes_dimensionalised"
 
 # List of plane files (Assuming sorted order corresponds to increasing z positions)
 plane_files_U = sorted(glob.glob(f"{data_folder}/Case_CC_Span_*_u.csv"))  # U component files
@@ -41,7 +41,7 @@ for file_Vs in plane_files_Vs:
     y_sets.append(set(dfv.index.astype(float)))
 
 # Define your desired range
-x_min, x_max = 120, 155  # Adjust these values as needed
+x_min, x_max = 0.12, 0.16  # Adjust these values as needed
 y_min, y_max = 0, 3.5   # Adjust these values as needed
 
 # Filter and sort the common x and y values within the range
