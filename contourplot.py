@@ -148,6 +148,37 @@ def main():
                 vmin=float(min_max_uv[i][0]),     # Lower limit
                 vmax=float(min_max_uv[i][1])      # Upper limit
             )
+            # 1) Import patches if not already done at the top of your file:
+            import matplotlib.patches as patches
+            ax = plt.gca()
+
+            # ADD RECTANGLES FOR SC ONLY
+            if config == "SC":
+                # Convert lengths from mm to dimensionless for the X direction
+                width_dim = 1.4/900
+                spacing_dim = 9.2/900
+                height_mm = 0.17  # Y in mm
+
+                # Left edge of the first rectangle is x/c=0.125
+                rectLeft = [0.125]  # dimensionless
+
+                center0 = rectLeft[0] + width_dim/2
+                # Build left edges for rectangles #2..#5
+                for k in range(1, 5):
+                    center_k = center0 + k*spacing_dim
+                    left_k = center_k - width_dim/2
+                    rectLeft.append(left_k)
+
+                # Add each rectangle (all black)
+                for left in rectLeft:
+                    rect = patches.Rectangle(
+                        (left, 0.0),  # bottom-left corner
+                        width_dim,    # dimensionless width
+                        height_mm,    # height in mm
+                        color='black'
+                    )
+                    ax.add_patch(rect)
+
             plt.colorbar(contour, label=f"{raw_label}/u∞(x)")
 
             plt.xlabel("Dimensionless X (x/c_x)")
