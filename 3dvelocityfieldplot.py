@@ -17,7 +17,7 @@ plane_files_Vs = sorted(glob.glob(f"{data_folder}/Case_SC_Span_*_v.csv"))  # V c
 z_positions = np.linspace(0, len(plane_files_U) - 1, len(plane_files_U))  # Define Z positions
 
 # Lists to store 3D velocity field
-U_list, V_list, W_list = [], [], []
+U_list, V_list, W_list, Uc_list, Vc_list = [], [], [], [], []
 
 # Step 1: Find common X and Y values across all planes
 x_sets = []
@@ -79,10 +79,14 @@ for i, (file_U,file_Us, file_V,file_Vs) in enumerate(zip(plane_files_U,plane_fil
     U_list.append(dfus.values) # U_list.append(dfus.values-dfu.values)
     V_list.append(dfvs.values) # V_list.append(dfvs.values-dfv.values)
     W_list.append(np.zeros_like(dfus.values)) # W_list.append((dfus.values-dfu.values)**0.5)  # Assuming W = 0 unless given
-
+    Uc_list.append(dfu.values) # U_list.append(dfus.values-dfu.values)
+    Vc_list.append(dfv.values) # V_list.append(dfvs.values-dfv.values)
+ 
 # Stack along the Z dimension
 U_3D = np.stack(U_list, axis=-1)  # Shape (Y, X, Z)
 V_3D = np.stack(V_list, axis=-1)
+Uc_3D = np.stack(Uc_list, axis=-1)  # Shape (Y, X, Z)
+Vc_3D = np.stack(Vc_list, axis=-1)
 W_3D = np.stack(W_list, axis=-1)
 
 
@@ -93,15 +97,32 @@ y_values = np.array(common_y_values)
 Y,X,Z = np.meshgrid(y_values,x_values,z_positions,indexing="ij")
 
 # Plot settings
-stepx = 30
-stepy = 5
+stepx = 1
+stepy = 1
 
 
 fig = plt.figure(figsize=(10, 10))
 ax = fig.add_subplot(111, projection="3d")
 
-print(np.shape(U_3D[::stepy,::stepx,:]))
+#print(np.shape(U_3D[::stepy,::stepx,:]))
 
+listaverageU = np.array([])
+listaverageUc = np.array([])
+listaverageV = np.array([])
+listaverageVc = np.array([])
+
+for i in range(24):
+    listaverageU = np.append(listaverageU,np.average(U_3D[:,:,i]))
+    listaverageUc = np.append(listaverageUc,np.average(Uc_3D[:,:,i]))
+    listaverageV = np.append(listaverageV,np.average(V_3D[:,:,i]))
+    listaverageVc = np.append(listaverageVc,np.average(Vc_3D[:,:,i]))
+
+print(np.std(listaverageU))
+print(np.std(listaverageUc))
+print(np.std(listaverageV))
+print(np.std(listaverageVc))
+
+'''
 ax.quiver(Y[::stepy,::stepx,:],X[::stepy,::stepx,:], Z[::stepy,::stepx,:], V_3D[::stepy,::stepx,:],U_3D[::stepy,::stepx,:], W_3D[::stepy,::stepx,:],length=0.1)
 ax.set_xlabel("Y")
 ax.set_ylabel("X")
@@ -117,3 +138,4 @@ plt.savefig(out_path, dpi=300, bbox_inches="tight")
 plt.close()
 
 print(f"Saved: {out_path}")
+'''

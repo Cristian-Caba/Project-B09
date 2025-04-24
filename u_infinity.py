@@ -40,7 +40,10 @@ def extract_u_at_y(csv_file, y_target=3.5):
     row_data = df.loc[actual_y]  # Pandas Series: index=X, values=U
     return row_data
 
+
 def main():
+    avgfreestreamUc = np.array([])
+    avgfreestreamUs = np.array([])
     """
     For each plane i in [1..24],
     1) Extract the entire row at y=3.5 for CC & SC.
@@ -98,6 +101,10 @@ def main():
         if len(sc_dimx) > 0:
             plt.plot(sc_dimx, u_sc, label='SC')
 
+        avgfreestreamUc = np.append(avgfreestreamUc,np.average(u_cc))
+        avgfreestreamUs = np.append(avgfreestreamUs,np.average(u_sc))
+
+
         plt.xlabel("Dimensionless X (x/c_x)")
         plt.ylabel("U velocity at y=3.5")
         plt.title(f"Plane {i}: U velocity at y=3.5, X in [120..155] => dimensionless")
@@ -108,6 +115,7 @@ def main():
         plt.savefig(out_name, dpi=300, bbox_inches="tight")
         plt.close()
         print(f"Saved {out_name}")
+    print(avgfreestreamUc,avgfreestreamUs)
 
 if __name__ == "__main__":
     main()

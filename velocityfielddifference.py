@@ -3,6 +3,7 @@ import numpy as np
 import glob
 import os
 import matplotlib.pyplot as plt
+import matplotlib.patches as patches
 
 # Folder containing all plane files
 data_folder = "PIV_planes_dimensionalised"
@@ -95,13 +96,41 @@ for i in range(len(plane_files_U)):
 
     print(X.shape,Y.shape)
 
+    fig = plt.figure(figsize=(10, 10))
+    ax = fig.add_subplot()
+
     # Plot the averaged velocity field with centered arrows
-    plt.figure(figsize=(10, 10))
-    plt.quiver(X[::stepy, ::stepx], Y[::stepy, ::stepx], U_2D[0][::stepy, ::stepx], V_2D[0][::stepy, ::stepx], color="b")
-    plt.xlabel("X")
-    plt.ylabel("Y")
-    plt.title(f"Velocity Field Plot of \n{plane_files_U[i]}")
-    plt.grid()
+    ax.quiver(X[::stepy, ::stepx], Y[::stepy, ::stepx], U_2D[0][::stepy, ::stepx], V_2D[0][::stepy, ::stepx], color="b")
+
+    c = 1272.8*np.cos(np.pi/4)
+    w = 1.4/c
+    h = 0.17
+    space = 9.2/c
+
+
+    rect1 = patches.Rectangle((0.125, 0), w, h,facecolor='black', alpha=1)
+
+    rect2 = patches.Rectangle((0.125+space, 0), w, h,facecolor='black', alpha=1)
+
+    rect3 = patches.Rectangle((0.125+2*space, 0), w, h,facecolor='black', alpha=1)
+
+    rect4 = patches.Rectangle((0.125+3*space, 0), w, h,facecolor='black', alpha=1)
+
+    rect5 = patches.Rectangle((0.125+4*space, 0), w, h,facecolor='black', alpha=1)
+
+    ax.add_patch(rect1)
+    ax.add_patch(rect2)
+    ax.add_patch(rect3)
+    ax.add_patch(rect4)
+    ax.add_patch(rect5)
+    ax.grid()
+
+    ax.set_xlim(0.12, 0.16)
+
+    # Add labels and title
+    ax.set_xlabel('x')
+    ax.set_ylabel('y')
+    ax.set_title(f"Velocity Field Plot of \n{plane_files_U[i]}")
 
 
     # Save the figure
