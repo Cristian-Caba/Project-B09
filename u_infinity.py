@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-
 import os
 import numpy as np
 import pandas as pd
@@ -116,6 +114,9 @@ def main():
         plt.close()
         print(f"Saved {out_name}")
     print(avgfreestreamUc,avgfreestreamUs)
+    a = input("Press enter to exit")
 
 if __name__ == "__main__":
     main()
+
+# print('hello')
