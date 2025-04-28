@@ -130,7 +130,7 @@ for i in range(len(plane_files_U)):
     # Add labels and title
     ax.set_xlabel('x')
     ax.set_ylabel('y')
-    ax.set_title(f"Velocity Field Plot of \n{plane_files_U[i]}")
+    # ax.set_title(f"Velocity Field Plot of \n{plane_files_U[i]}")
 
 
     # Save the figure
