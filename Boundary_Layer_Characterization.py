@@ -28,7 +28,7 @@ def get_u_e(xcoord, filename,filenameu):
     with open(filename) as file:
         matrix = np.genfromtxt(file, delimiter=',', filling_values=np.nan)
         
-        for i in range(35,45):
+        for i in range(5,60):
             if matrix[i][xcoord] < minvort:
                 minvort=matrix[i][xcoord]
                 rowminvort = i
@@ -74,6 +74,9 @@ def compute_boundary_layer_params(y_array, u_array, u_e):
 
     return delta_star, theta
 
+
+ccsc="CC"
+
 # ---------------------------------------------------------------------
 # Main script to read all files, compute BL parameters, and plot.
 # ---------------------------------------------------------------------
@@ -85,9 +88,9 @@ def main():
     # Each file can contain multiple x-stations, so we get arrays of x, delta*, theta
     for i in range(1, 25):
         # Filenames for u and v
-        file_u = os.path.join(data_dir, f"Case_SC_Span_{i}.txt_u.csv")
-        file_v = os.path.join(data_dir, f"Case_SC_Span_{i}.txt_v.csv")
-        file_vort = os.path.join( f"./Vorticity/Case_SC_Span_{i}.txt_vorticity.csv")
+        file_u = os.path.join(data_dir, f"Case_{ccsc}_Span_{i}.txt_u.csv")
+        file_v = os.path.join(data_dir, f"Case_{ccsc}_Span_{i}.txt_v.csv")
+        file_vort = os.path.join( f"./Vorticity/Case_{ccsc}_Span_{i}.txt_vorticity.csv")
         # --- READ THE U-COMPONENT CSV ---
         # We assume the CSV is structured such that:
         #   - row 0: [NaN, x1, x2, x3, ...]
@@ -188,7 +191,7 @@ def main():
         #plt.show()
 
         # Save in the "plots" folder
-        plot_dir = "BL_plots_SC"
+        plot_dir = f"BL_plots_{ccsc}"
         outname = os.path.join(plot_dir, f"BL_Parameters_Case_{i}.png")
         plt.savefig(outname, dpi=150)
         plt.close()
