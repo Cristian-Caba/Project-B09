@@ -85,9 +85,9 @@ def main():
     # Each file can contain multiple x-stations, so we get arrays of x, delta*, theta
     for i in range(1, 25):
         # Filenames for u and v
-        file_u = os.path.join(data_dir, f"Case_CC_Span_{i}.txt_u.csv")
-        file_v = os.path.join(data_dir, f"Case_CC_Span_{i}.txt_v.csv")
-        file_vort = os.path.join( f"./Vorticity/Case_CC_Span_{i}.txt_vorticity.csv")
+        file_u = os.path.join(data_dir, f"Case_SC_Span_{i}.txt_u.csv")
+        file_v = os.path.join(data_dir, f"Case_SC_Span_{i}.txt_v.csv")
+        file_vort = os.path.join( f"./Vorticity/Case_SC_Span_{i}.txt_vorticity.csv")
         # --- READ THE U-COMPONENT CSV ---
         # We assume the CSV is structured such that:
         #   - row 0: [NaN, x1, x2, x3, ...]
@@ -134,6 +134,10 @@ def main():
             u_e = get_u_e(ix+30,file_vort,file_u)
 
             # Compute boundary-layer parameters
+            #print()
+            #print("VEL PROFILE: ", u_profile)
+            #print("Free stream: ", u_e)
+            #print()
             dstar, th = compute_boundary_layer_params(y_coords_m, u_profile, u_e)
             dstar = dstar * 1000.0
             th = th * 1000.0
@@ -180,7 +184,7 @@ def main():
         #plt.show()
 
         # Save in the "plots" folder
-        plot_dir = "BL_plots"
+        plot_dir = "BL_plots_SC"
         outname = os.path.join(plot_dir, f"BL_Parameters_Case_{i}.png")
         plt.savefig(outname, dpi=150)
         plt.close()
