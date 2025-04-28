@@ -123,12 +123,12 @@ vmin = -vmax
 
 #ax.quiver(Y[::stepy,::stepx,:],X[::stepy,::stepx,:], Z[::stepy,::stepx,:], V_3D[::stepy,::stepx,:],U_3D[::stepy,::stepx,:], W_3D[::stepy,::stepx,:],length=0.1)
 for x in range(0,len(x_values),15):
-    plt.pcolormesh(Z,Y,Uc_3D[:,x,:],cmap='Spectral') #vmin=vmin,vmax=vmax) # vmin=float(np.min(DiffV_3D)),vmax=float(np.max(DiffV_3D))
+    plt.pcolormesh(Z,Y,U_3D[:,x,:],cmap='Spectral') #vmin=vmin,vmax=vmax) # vmin=float(np.min(DiffV_3D)),vmax=float(np.max(DiffV_3D))
     plt.xlabel("Z")
     plt.ylabel("Y")
     plt.xlim(0, 25)
     plt.ylim(0, 3.5)
-    plt.title("Velocity Field Plot")
+    plt.title(f"Velocity Field Plot (SC) at x={x_values[x]}")
     plt.grid()
     plt.colorbar()
     #plt.show()
@@ -158,7 +158,7 @@ for x in range(0,len(x_values),15):
     plt.plot(stdlistSC,y_values,label='Strip Config')
     plt.xlabel("Standard Deviation")
     plt.ylabel("y")
-    plt.title("Standard Deviation")
+    plt.title(f"Standard Deviation at x={x_values[x]}")
     plt.grid()
     plt.legend()
     #plt.show()
