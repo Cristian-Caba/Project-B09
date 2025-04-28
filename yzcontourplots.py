@@ -99,7 +99,7 @@ x_values = np.array(common_x_values)
 y_values = np.array(common_y_values)
 
 # Y,X,Z = np.meshgrid(y_values,x_values,z_positions,indexing="ij")
-Y,X = np.meshgrid(y_values,x_values,indexing="ij")
+Y,Z = np.meshgrid(y_values,z_positions,indexing="ij")
 
 # Plot settings
 stepx = 1
@@ -107,91 +107,68 @@ stepy = 1
 
 
 fig = plt.figure(figsize=(10, 10))
-ax = fig.add_subplot(111, projection="3d")
-
-#print(np.shape(U_3D[::stepy,::stepx,:]))
-
-listaverageU = np.array([])
-listaverageUc = np.array([])
-listaverageV = np.array([])
-listaverageVc = np.array([])
-
-for i in range(24):
-    listaverageU = np.append(listaverageU,np.average(U_3D[:,:,i]))
-    listaverageUc = np.append(listaverageUc,np.average(Uc_3D[:,:,i]))
-    listaverageV = np.append(listaverageV,np.average(V_3D[:,:,i]))
-    listaverageVc = np.append(listaverageVc,np.average(Vc_3D[:,:,i]))
-
-print(f'Standard Deviation of Velocity Fields: \n U velocity field in clean configuration: {np.std(listaverageUc/avgfreestreamUs)} \n U velocity field with strip configuration: {np.std(listaverageU/avgfreestreamUs)} \n V velocity field in clean configuration: {np.std(listaverageVc/avgfreestreamUs)} \n V velocity field with strip configuration: {np.std(listaverageV/avgfreestreamUs)}')
+#ax = fig.add_subplot(111, projection="3d")
 
 C_3D = np.sqrt(U_3D**2 + V_3D**2)
 Cc_3D = np.sqrt(Uc_3D**2 + Vc_3D**2)
-
 
 DiffV_3D = Vc_3D - V_3D
 
 Diff_3D = Cc_3D - C_3D
 
-vmax = 0.5# np.max(np.abs(DiffV_3D))  # Max absolute value
-vmin = -0.5# -vmax
+vmax = np.max(np.abs(U_3D))  # Max absolute value
+vmin = -vmax
+
 
 
 #ax.quiver(Y[::stepy,::stepx,:],X[::stepy,::stepx,:], Z[::stepy,::stepx,:], V_3D[::stepy,::stepx,:],U_3D[::stepy,::stepx,:], W_3D[::stepy,::stepx,:],length=0.1)
-for z in range(len(z_positions)):
-    ax.contourf(Y,X,DiffV_3D[:,:,z],zdir='z',offset=z,cmap='bwr',vmin=vmin,vmax=vmax, alpha=0.5) # vmin=float(np.min(DiffV_3D)),vmax=float(np.max(DiffV_3D))
+for x in range(0,len(x_values),30):
+    plt.pcolormesh(Z,Y,Uc_3D[:,x,:],cmap='Spectral') #vmin=vmin,vmax=vmax) # vmin=float(np.min(DiffV_3D)),vmax=float(np.max(DiffV_3D))
+    plt.xlabel("Z")
+    plt.ylabel("Y")
+    plt.xlim(0, 25)
+    plt.ylim(0, 3.5)
+    plt.title("Velocity Field Plot")
+    plt.grid()
+    plt.colorbar()
+    #plt.show()
 
-    c = 1272.8*np.cos(np.pi/4)
-    w = 1.4/c
-    h = 0.17
-    space = 9.2/c
+    # Save image
+    out_image_name = f"yzvelocityfield-x{x}.png"
+    out_path = f'C:\\Users\\iangh\\Documents\\Python\\GroupB09github\\Project-B09-1\\PIV_planes_dimensionalised\\yz-images\\{out_image_name}'
+    plt.savefig(out_path, dpi=300, bbox_inches="tight")
+    plt.close()
 
-for i in range(4):
-    # Define the size and position of the cuboid
-    x_start, y_start, z_start = 0, 0.125 + space*i, 0  # Bottom-front-left corner
-    length, width, height = h, w, 24
+    print(f"Saved: {out_path}")
 
-# Define the 8 vertices of the cuboid
-    vertices = np.array([
-        [x_start, y_start, z_start],
-        [x_start + length, y_start, z_start],
-        [x_start + length, y_start + width, z_start],
-        [x_start, y_start + width, z_start],
-        [x_start, y_start, z_start + height],
-        [x_start + length, y_start, z_start + height],
-        [x_start + length, y_start + width, z_start + height],
-        [x_start, y_start + width, z_start + height]
-    ])
+    #Uc_3D[:,x,:] = (Uc_3D[:,x,:] - np.mean(Uc_3D[:,x,:]))/np.std(Uc_3D[:,x,:])
+    #U_3D[:,x,:] = (U_3D[:,x,:] - np.mean(U_3D[:,x,:]))/np.std(U_3D[:,x,:])
 
-# Define the 6 faces (each face is a list of 4 vertices)
-    faces = [
-        [vertices[0], vertices[1], vertices[2], vertices[3]],  # Bottom
-        [vertices[4], vertices[5], vertices[6], vertices[7]],  # Top
-        [vertices[0], vertices[1], vertices[5], vertices[4]],  # Front
-        [vertices[1], vertices[2], vertices[6], vertices[5]],  # Right
-        [vertices[2], vertices[3], vertices[7], vertices[6]],  # Back
-        [vertices[3], vertices[0], vertices[4], vertices[7]]   # Left
-    ]
+    stdlistCC = np.array([])
+    stdlistSC = np.array([])
 
-    # Create the 3D polygon collection
-    cuboid = Poly3DCollection(faces, facecolors='black', edgecolors='black', linewidths=1, alpha=1)
 
-    # Add to the plot
-    ax.add_collection3d(cuboid)
+    for y in range(len(y_values)):
+        stdlistCC = np.append(stdlistCC,np.std(Uc_3D[y,x,:]))
+        stdlistSC = np.append(stdlistSC,np.std(U_3D[y,x,:]))
 
-ax.set_xlabel("Y")
-ax.set_ylabel("X")
-ax.set_zlabel("Z")
-ax.set_xlim(0, 3.5)
-ax.set_ylim(0.12, 0.16)
-ax.set_zlim(0, 24)
-ax.set_title("Velocity Field Plot")
-ax.grid()
-plt.show()
+    plt.clf()
 
-# Save image
-out_image_name = "3D_velocity_field.png"
-out_path = os.path.join(out_image_name)
-plt.savefig(out_path, dpi=300, bbox_inches="tight")
-plt.close()
+    plt.plot(stdlistCC,y_values,label='Clean Config')
+    plt.plot(stdlistSC,y_values,label='Strip Config')
+    plt.xlabel("Standard Deviation")
+    plt.ylabel("y")
+    plt.title("Standard Deviation")
+    plt.grid()
+    plt.legend()
+    #plt.show()
 
-print(f"Saved: {out_path}")
+    # Save image
+    out_image_name = f"standarddeviation-x{x}.png"
+    out_path = f'C:\\Users\\iangh\\Documents\\Python\\GroupB09github\\Project-B09-1\\PIV_planes_dimensionalised\\yz-images\\{out_image_name}'
+    plt.savefig(out_path, dpi=300, bbox_inches="tight")
+    plt.close()
+
+    print(f"Saved: {out_path}")
+
+
