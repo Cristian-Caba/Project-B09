@@ -1,6 +1,6 @@
 import numpy as np
-#from scipy.integrate import trapz
-from numpy import trapz
+#from scipy.integrate import trapezoid
+from numpy import trapezoid
 from pathlib import Path
 import math
 
@@ -28,7 +28,7 @@ def get_u_e(xcoord, filename,filenameu):
     with open(filename) as file:
         matrix = np.genfromtxt(file, delimiter=',', filling_values=np.nan)
         
-        for i in range(5,60):
+        for i in range(35,45):
             if matrix[i][xcoord] < minvort:
                 minvort=matrix[i][xcoord]
                 rowminvort = i
@@ -68,14 +68,11 @@ def compute_boundary_layer_params(y_array, u_array, u_e):
     # For momentum thickness: theta = ∫ [(u/u_e)*(1 - u/u_e)] dy
     integrand_theta = u_ratio * (1.0 - u_ratio)
 
-    # Perform numerical integration using numpy.trapz
-    delta_star = np.trapz(integrand_delta * (-1), x=y_array)
-    theta      = np.trapz(integrand_theta * (-1), x=y_array)
+    # Perform numerical integration using numpy.trapezoid
+    delta_star = np.trapezoid(integrand_delta * (-1), x=y_array)
+    theta      = np.trapezoid(integrand_theta * (-1), x=y_array)
 
     return delta_star, theta
-
-
-ccsc="CC"
 
 # ---------------------------------------------------------------------
 # Main script to read all files, compute BL parameters, and plot.
@@ -88,9 +85,9 @@ def main():
     # Each file can contain multiple x-stations, so we get arrays of x, delta*, theta
     for i in range(1, 25):
         # Filenames for u and v
-        file_u = os.path.join(data_dir, f"Case_{ccsc}_Span_{i}.txt_u.csv")
-        file_v = os.path.join(data_dir, f"Case_{ccsc}_Span_{i}.txt_v.csv")
-        file_vort = os.path.join( f"./Vorticity/Case_{ccsc}_Span_{i}.txt_vorticity.csv")
+        file_u = os.path.join(data_dir, f"Case_SC_Span_{i}.txt_u.csv")
+        file_v = os.path.join(data_dir, f"Case_SC_Span_{i}.txt_v.csv")
+        file_vort = os.path.join( f"./Vorticity/Case_SC_Span_{i}.txt_vorticity.csv")
         # --- READ THE U-COMPONENT CSV ---
         # We assume the CSV is structured such that:
         #   - row 0: [NaN, x1, x2, x3, ...]
@@ -191,7 +188,7 @@ def main():
         #plt.show()
 
         # Save in the "plots" folder
-        plot_dir = f"BL_plots_{ccsc}"
+        plot_dir = "BL_plots_SC"
         outname = os.path.join(plot_dir, f"BL_Parameters_Case_{i}.png")
         plt.savefig(outname, dpi=150)
         plt.close()
