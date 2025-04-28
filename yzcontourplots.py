@@ -122,7 +122,7 @@ vmin = -vmax
 
 
 #ax.quiver(Y[::stepy,::stepx,:],X[::stepy,::stepx,:], Z[::stepy,::stepx,:], V_3D[::stepy,::stepx,:],U_3D[::stepy,::stepx,:], W_3D[::stepy,::stepx,:],length=0.1)
-for x in range(0,len(x_values),30):
+for x in range(0,len(x_values),15):
     plt.pcolormesh(Z,Y,Uc_3D[:,x,:],cmap='Spectral') #vmin=vmin,vmax=vmax) # vmin=float(np.min(DiffV_3D)),vmax=float(np.max(DiffV_3D))
     plt.xlabel("Z")
     plt.ylabel("Y")
@@ -141,8 +141,8 @@ for x in range(0,len(x_values),30):
 
     print(f"Saved: {out_path}")
 
-    #Uc_3D[:,x,:] = (Uc_3D[:,x,:] - np.mean(Uc_3D[:,x,:]))/np.std(Uc_3D[:,x,:])
-    #U_3D[:,x,:] = (U_3D[:,x,:] - np.mean(U_3D[:,x,:]))/np.std(U_3D[:,x,:])
+    Uc_3D[:,x,:] = (Uc_3D[:,x,:] - np.mean(Uc_3D[:,x,:]))/np.std(Uc_3D[:,x,:])
+    U_3D[:,x,:] = (U_3D[:,x,:] - np.mean(U_3D[:,x,:]))/np.std(U_3D[:,x,:])
 
     stdlistCC = np.array([])
     stdlistSC = np.array([])
