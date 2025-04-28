@@ -134,10 +134,10 @@ def main():
             u_e = get_u_e(ix+30,file_vort,file_u)
 
             # Compute boundary-layer parameters
-            print()
-            print("VEL PROFILE: ", u_profile)
-            print("Free stream: ", u_e)
-            print()
+            #print()
+            #print("VEL PROFILE: ", u_profile)
+            #print("Free stream: ", u_e)
+            #print()
             dstar, th = compute_boundary_layer_params(y_coords_m, u_profile, u_e)
             dstar = dstar * 1000.0
             th = th * 1000.0
