@@ -1,133 +1,146 @@
 #!/usr/bin/env python3
-
+# ΔU and ΔV (SC − CC) contour maps for Span_1‥24
+# x∈[120,155] mm, y∈[0,4] mm ;  X-axis nondimensionalised with convert_sx
+# Colour scale fixed: −8 (blue) … 0 (white) … +3.5 (red)
+# Wide-and-thin figure: 10 in × 2.5 in
 import os
-import pandas as pd
 import numpy as np
+import pandas as pd
 import matplotlib.pyplot as plt
+from matplotlib.colors import TwoSlopeNorm
+import matplotlib.patches as patches
+from dimensionalization import convert_sx
 
-from dimensionalization import convert_sx  # for dimensionless X-axis
+# ── constants ───────────────────────────────────────────────────────────────
+X_MIN, X_MAX = 120, 155           # mm
+Y_MIN, Y_MAX =   0,   4           # mm
+LEVELS       = np.linspace(-0.2, 0.2, 257)   # 256 uniform bands
+NORM         = TwoSlopeNorm(vmin=-0.2, vcenter=0, vmax=0.2)
+OUT_DIR      = "images_diff"
 
-def difference_and_plot(cc_u_file, sc_u_file, cc_v_file, sc_v_file, 
-                        output_folder="images_diff", 
-                        x_min=120, x_max=155, 
-                        y_min=0,   y_max=4):
-    """
-    Reads clean config (CC) and strips config (SC) data for U and V,
-    subtracts (SC - CC) for both U and V, 
-    restricts domain to x ∈ [x_min, x_max], y ∈ [y_min, y_max],
-    converts X to dimensionless chord fraction, and makes contour plots.
-    """
-    # Ensure output folder
-    os.makedirs(output_folder, exist_ok=True)
+# ── helpers ────────────────────────────────────────────────────────────────
+def _read_as_float(csv_path):
+    """Read CSV -> DataFrame with float axes, or None if file missing/empty."""
+    if not os.path.isfile(csv_path):
+        print(f"missing file: {csv_path}")
+        return None
+    df = pd.read_csv(csv_path, index_col=0)
+    if df.empty:
+        print(f"empty file: {csv_path}")
+        return None
+    df.index   = df.index.astype(float)    # Y
+    df.columns = df.columns.astype(float)  # X
+    return df
 
-    # --- 1) Load CC and SC for U ---
-    df_cc_u = pd.read_csv(cc_u_file, index_col=0)
-    df_sc_u = pd.read_csv(sc_u_file, index_col=0)
-    
-    # Convert columns (X) and index (Y) to float
-    df_cc_u.columns = df_cc_u.columns.astype(float)
-    df_cc_u.index   = df_cc_u.index.astype(float)
-    df_sc_u.columns = df_sc_u.columns.astype(float)
-    df_sc_u.index   = df_sc_u.index.astype(float)
+def _window(df):
+    """Slice DataFrame to analysis rectangle."""
+    return df.loc[
+        (df.index   >= Y_MIN) & (df.index   <= Y_MAX),
+        (df.columns >= X_MIN) & (df.columns <= X_MAX)
+    ]
 
-    # Restrict domain [x_min..x_max], [y_min..y_max] by position
-    x_vals_u = df_cc_u.columns.values
-    y_vals_u = df_cc_u.index.values
+def _plot(title, file_png, Xdim, Y, diff):
+    """Wide, thin contour plot with four strips and fixed −8…+3.5 scale."""
+    plt.figure(figsize=(10, 2))
 
-    x_mask_u = (x_vals_u >= x_min) & (x_vals_u <= x_max)
-    y_mask_u = (y_vals_u >= y_min) & (y_vals_u <= y_max)
+    cf = plt.contourf(
+        Xdim, Y, diff,
+        levels=np.linspace(-0.2, 0.2, 257),
+        cmap='bwr',
+        norm=TwoSlopeNorm(vmin=-0.2, vcenter=0, vmax=0.2),
+        extend='both'
+    )
+    # colour-bar with only min / max ticks
+    cbar = plt.colorbar(cf)
+    cbar.set_ticks([-0.2, 0.2])
+    cbar.set_ticklabels(['-0.2', '0.2'])
 
-    df_cc_u_sub = df_cc_u.iloc[y_mask_u, x_mask_u]
-    df_sc_u_sub = df_sc_u.iloc[y_mask_u, x_mask_u]
+    ax = plt.gca()
 
-    # Compute difference SC - CC for U
-    diff_u = df_sc_u_sub.values - df_cc_u_sub.values
+    # --- compute desired limits BEFORE adding strips ---------------------------
+    xlim_target = (Xdim.min(), Xdim.max())     # data range only
 
-    # Build dimensionless X
-    x_sub_u = df_cc_u_sub.columns.values  # restricted x
-    y_sub_u = df_cc_u_sub.index.values    # restricted y
-    x_dimless_u = convert_sx(x_sub_u)
+    # ----- four black strips ---------------------------------------------------
+    width   = 1.4 / 900
+    spacing = 9.2 / 900
+    height  = 0.17
+    x_left0 = 0.125
+    centre0 = x_left0 + width/2
 
-    Xdim_u, Ydim_u = np.meshgrid(x_dimless_u, y_sub_u)
-
-    # Plot difference in U
-    plt.figure()
-    cont_u = plt.contourf(Xdim_u, Ydim_u, diff_u, levels=50)
-    plt.colorbar(cont_u, label="ΔU (SC - CC)")
-    plt.xlabel("Dimensionless X (x/c)")
-    plt.ylabel("Y")
-    plt.title(f"Difference in U Velocity\n(SC - CC): {os.path.basename(cc_u_file)}")
-
-    out_u = os.path.join(output_folder, f"difference_U_{os.path.basename(cc_u_file)}_dimx.png")
-    plt.savefig(out_u, dpi=300, bbox_inches="tight")
-    plt.close()
-    print(f"Saved: {out_u}")
-
-    # --- 2) Load CC and SC for V ---
-    df_cc_v = pd.read_csv(cc_v_file, index_col=0)
-    df_sc_v = pd.read_csv(sc_v_file, index_col=0)
-
-    df_cc_v.columns = df_cc_v.columns.astype(float)
-    df_cc_v.index   = df_cc_v.index.astype(float)
-    df_sc_v.columns = df_sc_v.columns.astype(float)
-    df_sc_v.index   = df_sc_v.index.astype(float)
-
-    # Restrict domain
-    x_vals_v = df_cc_v.columns.values
-    y_vals_v = df_cc_v.index.values
-
-    x_mask_v = (x_vals_v >= x_min) & (x_vals_v <= x_max)
-    y_mask_v = (y_vals_v >= y_min) & (y_vals_v <= y_max)
-
-    df_cc_v_sub = df_cc_v.iloc[y_mask_v, x_mask_v]
-    df_sc_v_sub = df_sc_v.iloc[y_mask_v, x_mask_v]
-
-    # Compute difference SC - CC for V
-    diff_v = df_sc_v_sub.values - df_cc_v_sub.values
-
-    # Build dimensionless X
-    x_sub_v = df_cc_v_sub.columns.values
-    y_sub_v = df_cc_v_sub.index.values
-    x_dimless_v = convert_sx(x_sub_v)
-
-    Xdim_v, Ydim_v = np.meshgrid(x_dimless_v, y_sub_v)
-
-    # Plot difference in V
-    plt.figure()
-    cont_v = plt.contourf(Xdim_v, Ydim_v, diff_v, levels=50)
-    plt.colorbar(cont_v, label="ΔV (SC - CC)")
-    plt.xlabel("Dimensionless X (x/c)")
-    plt.ylabel("Y")
-    plt.title(f"Difference in V Velocity\n(SC - CC): {os.path.basename(cc_v_file)}")
-
-    out_v = os.path.join(output_folder, f"difference_V_{os.path.basename(cc_v_file)}_dimx.png")
-    plt.savefig(out_v, dpi=300, bbox_inches="tight")
-    plt.close()
-    print(f"Saved: {out_v}")
-
-def main():
-    """
-    Generate difference plots (SC - CC) for Span_1..24,
-    restricting to x∈[120,155], y∈[0,4], 
-    and converting X to dimensionless chord fraction.
-    """
-    for i in range(1, 25):
-        cc_u_file = f"PIV_planes/Case_CC_Span_{i}.txt_u.csv"
-        sc_u_file = f"PIV_planes/Case_SC_Span_{i}.txt_u.csv"
-        cc_v_file = f"PIV_planes/Case_CC_Span_{i}.txt_v.csv"
-        sc_v_file = f"PIV_planes/Case_SC_Span_{i}.txt_v.csv"
-
-        difference_and_plot(
-            cc_u_file=cc_u_file,
-            sc_u_file=sc_u_file,
-            cc_v_file=cc_v_file,
-            sc_v_file=sc_v_file,
-            output_folder="images_diff",
-            x_min=120,
-            x_max=155,
-            y_min=0,
-            y_max=4
+    for k in range(4):
+        centre = centre0 + k*spacing
+        left   = centre - width/2
+        ax.add_patch(
+            patches.Rectangle(
+                (left, Y.min()),      # bottom-left
+                width,
+                height,
+                color='black',
+                clip_on=True          # still good practice
+            )
         )
+
+    # --- restore original X-limits so patch is cropped -------------------------
+    ax.set_xlim(xlim_target)            # <<–– keeps rectangle but crops excess
+
+
+
+    plt.xlabel("Dimensionless X (x/c)")
+    plt.ylabel("Y [mm]")
+    plt.title(title)
+    plt.savefig(file_png, dpi=300, bbox_inches='tight')
+    plt.close()
+    print(f"Saved: {file_png}")
+# ---------------------------------------------------------------------------
+
+
+# ── single span ────────────────────────────────────────────────────────────
+def process_span(i_span: int):
+    cc_u = f"PIV_planes/Case_CC_Span_{i_span}.txt_u.csv"
+    sc_u = f"PIV_planes/Case_SC_Span_{i_span}.txt_u.csv"
+    cc_v = f"PIV_planes/Case_CC_Span_{i_span}.txt_v.csv"
+    sc_v = f"PIV_planes/Case_SC_Span_{i_span}.txt_v.csv"
+
+    # Read all four; skip span if any missing
+    dfs = {name: _read_as_float(path) for name, path in
+           [('cc_u', cc_u), ('sc_u', sc_u), ('cc_v', cc_v), ('sc_v', sc_v)]}
+    if any(df is None for df in dfs.values()):
+        print(f"Span {i_span:02d}: skipped (missing file)")
+        return
+
+    # U-component
+    diff_u = _window(dfs['sc_u']).values - _window(dfs['cc_u']).values
+    Xdim_u, Y_u = np.meshgrid(
+        convert_sx(_window(dfs['cc_u']).columns.values),
+        _window(dfs['cc_u']).index.values
+    )
+    _plot(
+        title   = f"Span {i_span:02d}  ΔU (SC – CC)",
+        file_png= os.path.join(OUT_DIR, f"Span_{i_span:02d}_U.png"),
+        Xdim    = Xdim_u,
+        Y       = Y_u,
+        diff    = diff_u
+    )
+
+    # V-component
+    diff_v = _window(dfs['sc_v']).values - _window(dfs['cc_v']).values
+    Xdim_v, Y_v = np.meshgrid(
+        convert_sx(_window(dfs['cc_v']).columns.values),
+        _window(dfs['cc_v']).index.values
+    )
+    _plot(
+        title   = f"Span {i_span:02d}  ΔV (SC – CC)",
+        file_png= os.path.join(OUT_DIR, f"Span_{i_span:02d}_V.png"),
+        Xdim    = Xdim_v,
+        Y       = Y_v,
+        diff    = diff_v
+    )
+
+# ── batch driver ───────────────────────────────────────────────────────────
+def main():
+    os.makedirs(OUT_DIR, exist_ok=True)
+    for span in range(1, 25):
+        process_span(span)
 
 if __name__ == "__main__":
     main()

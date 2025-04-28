@@ -1,7 +1,8 @@
 import numpy as np
-#from scipy.integrate import trapz
-from numpy import trapz
+#from scipy.integrate import trapezoid
+from numpy import trapezoid
 from pathlib import Path
+import math
 
 import pandas as pd
 #from u_infinity import compute_u_inf_for_config_span
@@ -67,10 +68,9 @@ def compute_boundary_layer_params(y_array, u_array, u_e):
     # For momentum thickness: theta = ∫ [(u/u_e)*(1 - u/u_e)] dy
     integrand_theta = u_ratio * (1.0 - u_ratio)
 
-    # Perform numerical integration using numpy.trapz
-    #print(y_array)
-    delta_star = np.trapz(integrand_delta * (-1), x=y_array)
-    theta      = np.trapz(integrand_theta * (-1), x=y_array)
+    # Perform numerical integration using numpy.trapezoid
+    delta_star = np.trapezoid(integrand_delta * (-1), x=y_array)
+    theta      = np.trapezoid(integrand_theta * (-1), x=y_array)
 
     return delta_star, theta
 
@@ -102,6 +102,10 @@ def main():
 
         # Extract x-coordinates from row 0, skipping the very first cell
         x_coords = df_u.iloc[0, 30:300].values.astype(float)
+        C_X = 1272.8  # milimeters
+        Sweep = math.radians(45)
+        C_x = C_X * math.cos(Sweep)
+        x_coords = x_coords / C_x  # Convert to local system
 
         # Extract y-coordinates from col 0, skipping the very first cell
         y_coords = df_u.iloc[1:, 0].values.astype(float)
