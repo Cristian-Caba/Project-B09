@@ -41,7 +41,7 @@ def _window(df):
 
 def _plot(title, file_png, Xdim, Y, diff):
     """Wide, thin contour plot with four strips and fixed −8…+3.5 scale."""
-    plt.figure(figsize=(10, 2.5))
+    plt.figure(figsize=(10, 2))
 
     cf = plt.contourf(
         Xdim, Y, diff,
