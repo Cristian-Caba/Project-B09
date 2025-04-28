@@ -120,10 +120,7 @@ for i in range(24):
     listaverageV = np.append(listaverageV,np.average(V_3D[:,:,i]))
     listaverageVc = np.append(listaverageVc,np.average(Vc_3D[:,:,i]))
 
-print(np.std(listaverageU/avgfreestreamUs))
-print(np.std(listaverageUc/avgfreestreamUs))
-print(np.std(listaverageV/avgfreestreamUs))
-print(np.std(listaverageVc/avgfreestreamUc))
+print(f'Standard Deviation of Velocity Fields: \n U velocity field in clean configuration: {np.std(listaverageUc/avgfreestreamUs)} \n U velocity field with strip configuration: {np.std(listaverageU/avgfreestreamUs)} \n V velocity field in clean configuration: {np.std(listaverageVc/avgfreestreamUs)} \n V velocity field with strip configuration: {np.std(listaverageV/avgfreestreamUs)}')
 
 '''
 ax.quiver(Y[::stepy,::stepx,:],X[::stepy,::stepx,:], Z[::stepy,::stepx,:], V_3D[::stepy,::stepx,:],U_3D[::stepy,::stepx,:], W_3D[::stepy,::stepx,:],length=0.1)
