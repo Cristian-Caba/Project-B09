@@ -141,8 +141,12 @@ for x in range(0,len(x_values),15):
 
     print(f"Saved: {out_path}")
 
-    Uc_3D[:,x,:] = (Uc_3D[:,x,:] - np.mean(Uc_3D[:,x,:]))/np.std(Uc_3D[:,x,:])
-    U_3D[:,x,:] = (U_3D[:,x,:] - np.mean(U_3D[:,x,:]))/np.std(U_3D[:,x,:])
+    print(np.shape(Uc_3D))
+
+    Uc_3D[:,x,:] = Uc_3D[:,x,:]/np.mean(Uc_3D[27,x,:])
+    U_3D[:,x,:] = U_3D[:,x,:]/np.mean(U_3D[27,x,:])
+    
+    # U_3D[:,x,:] = (U_3D[:,x,:] - np.mean(U_3D[:,x,:]))/np.std(U_3D[:,x,:])
 
     stdlistCC = np.array([])
     stdlistSC = np.array([])
