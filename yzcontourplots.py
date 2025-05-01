@@ -5,6 +5,7 @@ import os
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 from mpl_toolkits.mplot3d.art3d import Poly3DCollection
+import scipy as sp
 
 
 # Folder containing all plane files
@@ -123,9 +124,9 @@ vmin = -vmax
 
 #ax.quiver(Y[::stepy,::stepx,:],X[::stepy,::stepx,:], Z[::stepy,::stepx,:], V_3D[::stepy,::stepx,:],U_3D[::stepy,::stepx,:], W_3D[::stepy,::stepx,:],length=0.1)
 for x in range(0,len(x_values),15):
-    plt.pcolormesh(Z,Y,U_3D[:,x,:],cmap='Spectral') #vmin=vmin,vmax=vmax) # vmin=float(np.min(DiffV_3D)),vmax=float(np.max(DiffV_3D))
-    plt.xlabel("Z")
-    plt.ylabel("Y")
+    plt.pcolormesh(Z,Y,V_3D[:,x,:]/np.mean(U_3D[27,x,:]),cmap='Spectral') #vmin=vmin,vmax=vmax) # vmin=float(np.min(DiffV_3D)),vmax=float(np.max(DiffV_3D))
+    plt.xlabel("z")
+    plt.ylabel("y")
     plt.xlim(0, 25)
     plt.ylim(0, 3.5)
     plt.title(f"Velocity Field Plot (SC) at x={x_values[x]}")
@@ -141,7 +142,10 @@ for x in range(0,len(x_values),15):
 
     print(f"Saved: {out_path}")
 
-    print(np.shape(Uc_3D))
+    fft = sp.fft((V_3D[10,x,:]/np.mean(U_3D[27,x,:]))/np.mean(V_3D[:,x,:]/np.mean(U_3D[27,x,:])))
+
+    print(fft)
+
 
     Uc_3D[:,x,:] = Uc_3D[:,x,:]/np.mean(Uc_3D[27,x,:])
     U_3D[:,x,:] = U_3D[:,x,:]/np.mean(U_3D[27,x,:])
