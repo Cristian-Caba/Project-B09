@@ -4,16 +4,17 @@ import glob
 import os
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
+from mpl_toolkits.mplot3d.art3d import Poly3DCollection
 
 
 # Folder containing all plane files
-data_folder = "PIV_planes"
+data_folder = "PIV_planes_dimensionalised"
 
 # List of plane files (Assuming sorted order corresponds to increasing z positions)
-plane_files_U = sorted(glob.glob(f"{data_folder}/Case_CC_Span_*_u.csv"))  # U component files
-plane_files_V = sorted(glob.glob(f"{data_folder}/Case_CC_Span_*_v.csv"))  # V component files
-plane_files_Us = sorted(glob.glob(f"{data_folder}/Case_SC_Span_*_u.csv"))  # U component files
-plane_files_Vs = sorted(glob.glob(f"{data_folder}/Case_SC_Span_*_v.csv"))  # V component files
+plane_files_U = sorted(glob.glob(f"{data_folder}/Case_CC_Span_*.txt_u.csv"))  # U component files
+plane_files_V = sorted(glob.glob(f"{data_folder}/Case_CC_Span_*.txt_v.csv"))  # V component files
+plane_files_Us = sorted(glob.glob(f"{data_folder}/Case_SC_Span_*.txt_u.csv"))  # U component files
+plane_files_Vs = sorted(glob.glob(f"{data_folder}/Case_SC_Span_*.txt_v.csv"))  # V component files
 z_positions = np.linspace(0, len(plane_files_U) - 1, len(plane_files_U))  # Define Z positions
 
 # Lists to store 3D velocity field
@@ -44,7 +45,7 @@ for file_Vs in plane_files_Vs:
     y_sets.append(set(dfv.index.astype(float)))
 
 # Define your desired range
-x_min, x_max = 120, 155  # Adjust these values as needed
+x_min, x_max = 0.12, 0.16  # Adjust these values as needed
 y_min, y_max = 0, 3.5   # Adjust these values as needed
 
 # Filter and sort the common x and y values within the range
@@ -97,7 +98,8 @@ W_3D = np.stack(W_list, axis=-1)
 x_values = np.array(common_x_values)
 y_values = np.array(common_y_values)
 
-Y,X,Z = np.meshgrid(y_values,x_values,z_positions,indexing="ij")
+# Y,X,Z = np.meshgrid(y_values,x_values,z_positions,indexing="ij")
+Y,X = np.meshgrid(y_values,x_values,indexing="ij")
 
 # Plot settings
 stepx = 1
@@ -122,11 +124,66 @@ for i in range(24):
 
 print(f'Standard Deviation of Velocity Fields: \n U velocity field in clean configuration: {np.std(listaverageUc/avgfreestreamUs)} \n U velocity field with strip configuration: {np.std(listaverageU/avgfreestreamUs)} \n V velocity field in clean configuration: {np.std(listaverageVc/avgfreestreamUs)} \n V velocity field with strip configuration: {np.std(listaverageV/avgfreestreamUs)}')
 
-'''
-ax.quiver(Y[::stepy,::stepx,:],X[::stepy,::stepx,:], Z[::stepy,::stepx,:], V_3D[::stepy,::stepx,:],U_3D[::stepy,::stepx,:], W_3D[::stepy,::stepx,:],length=0.1)
+C_3D = np.sqrt(U_3D**2 + V_3D**2)
+Cc_3D = np.sqrt(Uc_3D**2 + Vc_3D**2)
+
+
+DiffV_3D = Vc_3D - V_3D
+
+Diff_3D = Cc_3D - C_3D
+
+vmax = 0.5# np.max(np.abs(DiffV_3D))  # Max absolute value
+vmin = -0.5# -vmax
+
+
+#ax.quiver(Y[::stepy,::stepx,:],X[::stepy,::stepx,:], Z[::stepy,::stepx,:], V_3D[::stepy,::stepx,:],U_3D[::stepy,::stepx,:], W_3D[::stepy,::stepx,:],length=0.1)
+for z in range(len(z_positions)):
+    ax.contourf(Y,X,DiffV_3D[:,:,z],zdir='z',offset=z,cmap='bwr',vmin=vmin,vmax=vmax, alpha=0.5) # vmin=float(np.min(DiffV_3D)),vmax=float(np.max(DiffV_3D))
+
+    c = 1272.8*np.cos(np.pi/4)
+    w = 1.4/c
+    h = 0.17
+    space = 9.2/c
+
+for i in range(4):
+    # Define the size and position of the cuboid
+    x_start, y_start, z_start = 0, 0.125 + space*i, 0  # Bottom-front-left corner
+    length, width, height = h, w, 24
+
+# Define the 8 vertices of the cuboid
+    vertices = np.array([
+        [x_start, y_start, z_start],
+        [x_start + length, y_start, z_start],
+        [x_start + length, y_start + width, z_start],
+        [x_start, y_start + width, z_start],
+        [x_start, y_start, z_start + height],
+        [x_start + length, y_start, z_start + height],
+        [x_start + length, y_start + width, z_start + height],
+        [x_start, y_start + width, z_start + height]
+    ])
+
+# Define the 6 faces (each face is a list of 4 vertices)
+    faces = [
+        [vertices[0], vertices[1], vertices[2], vertices[3]],  # Bottom
+        [vertices[4], vertices[5], vertices[6], vertices[7]],  # Top
+        [vertices[0], vertices[1], vertices[5], vertices[4]],  # Front
+        [vertices[1], vertices[2], vertices[6], vertices[5]],  # Right
+        [vertices[2], vertices[3], vertices[7], vertices[6]],  # Back
+        [vertices[3], vertices[0], vertices[4], vertices[7]]   # Left
+    ]
+
+    # Create the 3D polygon collection
+    cuboid = Poly3DCollection(faces, facecolors='black', edgecolors='black', linewidths=1, alpha=1)
+
+    # Add to the plot
+    ax.add_collection3d(cuboid)
+
 ax.set_xlabel("Y")
 ax.set_ylabel("X")
 ax.set_zlabel("Z")
+ax.set_xlim(0, 3.5)
+ax.set_ylim(0.12, 0.16)
+ax.set_zlim(0, 24)
 ax.set_title("Velocity Field Plot")
 ax.grid()
 plt.show()
@@ -138,4 +195,3 @@ plt.savefig(out_path, dpi=300, bbox_inches="tight")
 plt.close()
 
 print(f"Saved: {out_path}")
-'''
