@@ -6,7 +6,7 @@ vmin=9999999.3
 vmax=-80000.3
 # fig, axes = plt.subplots(figsize=(12, 18))
 # axes = axes.flatten()
-ccsc="SC"
+ccsc="CC"
 
 cmin=-50
 cmax=0
@@ -37,7 +37,7 @@ for i in range (0,24):
     Z = np.clip(z_sliced, cmin, cmax)
     fig, axes = plt.subplots(figsize=(6, 4))
     c = axes.contourf(X, Y, Z, levels=50, cmap='Spectral',vmin=cmin,vmax=cmax)
-    axes.set_title(f"Frame{i+1}")
+    axes.set_title(f"Plane {i+1}")
     axes.set_xlabel('Chord')
     axes.set_ylabel('Height')
     axes.set_xlim(0.12,0.158)
