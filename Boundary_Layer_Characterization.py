@@ -1,6 +1,6 @@
 import numpy as np
-#from scipy.integrate import trapezoid
-from numpy import trapezoid
+from scipy.integrate import trapezoid
+#from numpy import trapezoid
 from pathlib import Path
 import math
 
@@ -28,14 +28,14 @@ def get_u_e(xcoord, filename,filenameu):
     with open(filename) as file:
         matrix = np.genfromtxt(file, delimiter=',', filling_values=np.nan)
         
-        for i in range(35,45):
+        for i in range(10,50):
             if matrix[i][xcoord] < minvort:
                 minvort=matrix[i][xcoord]
                 rowminvort = i
     with open(filenameu) as file:
         matrix = np.genfromtxt(file, delimiter=',', filling_values=np.nan)
         
-    return float(matrix[rowminvort+1][xcoord+1])
+    return (float(matrix[rowminvort][xcoord]), i)
          
 
 # ---------------------------------------------------------------------
@@ -61,33 +61,46 @@ def compute_boundary_layer_params(y_array, u_array, u_e):
     """
     # Normalize velocity by u_e
     u_ratio = u_array / u_e
-
+    u_ratio[u_ratio>0.97]=1
     # For displacement thickness: delta* = ∫ [1 - (u/u_e)] dy
     integrand_delta = 1.0 - u_ratio
 
     # For momentum thickness: theta = ∫ [(u/u_e)*(1 - u/u_e)] dy
     integrand_theta = u_ratio * (1.0 - u_ratio)
-
+    
+    #print (u_ratio)
     # Perform numerical integration using numpy.trapezoid
-    delta_star = np.trapezoid(integrand_delta * (-1), x=y_array)
-    theta      = np.trapezoid(integrand_theta * (-1), x=y_array)
+    # --- Debugging ---
+    # if np.any(integrand_delta < 0):
+    #     print(f"WARNING: Negative values found in integrand_delta. Min value: {np.min(integrand_delta)}")
+    #     # Optional: print indices where it's negative
+    #     # print(f"Indices: {np.where(integrand_delta < 0)}")
+    # if np.any(integrand_theta < 0):
+    #     print(f"WARNING: Negative values found in integrand_theta. Min value: {np.min(integrand_theta)}")
+    #     # print(f"Indices: {np.where(integrand_theta < 0)}")
+    # --- End Debugging ---
+    
+    delta_star = trapezoid(integrand_delta , x=y_array[::-1])
+    theta      = trapezoid(integrand_theta , x=y_array[::-1])
 
     return delta_star, theta
+
+ccsc="SC"
 
 # ---------------------------------------------------------------------
 # Main script to read all files, compute BL parameters, and plot.
 # ---------------------------------------------------------------------
 def main():
     # Directory where your CSV files are located
-    data_dir = "./PIV_planes"  # Change to your path if needed
+    data_dir = "./PIV_planes_dimensionalised"  # Change to your path if needed
     counter = 0
     # We will store results for each case (i=1..25)
     # Each file can contain multiple x-stations, so we get arrays of x, delta*, theta
     for i in range(1, 25):
         # Filenames for u and v
-        file_u = os.path.join(data_dir, f"Case_SC_Span_{i}.txt_u.csv")
-        file_v = os.path.join(data_dir, f"Case_SC_Span_{i}.txt_v.csv")
-        file_vort = os.path.join( f"./Vorticity/Case_SC_Span_{i}.txt_vorticity.csv")
+        file_u = os.path.join(data_dir, f"Case_{ccsc}_Span_{i}.txt_u.csv")
+        file_v = os.path.join(data_dir, f"Case_{ccsc}_Span_{i}.txt_v.csv")
+        file_vort = os.path.join( f"Vorticity/Case_{ccsc}_Span_{i}.txt_vorticity.csv")
         # --- READ THE U-COMPONENT CSV ---
         # We assume the CSV is structured such that:
         #   - row 0: [NaN, x1, x2, x3, ...]
@@ -102,21 +115,20 @@ def main():
 
         # Extract x-coordinates from row 0, skipping the very first cell
         x_coords = df_u.iloc[0, 30:300].values.astype(float)
-        C_X = 1272.8  # milimeters
-        Sweep = math.radians(45)
-        C_x = C_X * math.cos(Sweep)
-        x_coords = x_coords / C_x  # Convert to local system
+        # C_X = 1272.8  # milimeters
+        # Sweep = math.radians(45)
+        # C_x = C_X * math.cos(Sweep)
+        # x_coords = x_coords / C_x  # Convert to local system
 
         # Extract y-coordinates from col 0, skipping the very first cell
-        y_coords = df_u.iloc[1:, 0].values.astype(float)
-
+        y_coords = df_u.iloc[20:, 0].values.astype(float)
 
         # Convert y from mm to m for integration:
-        y_coords_m = y_coords / 1000.0
-
+        y_coords_m = y_coords
+        # print (y_coords)
         # Extract the velocity data
         # This should be a 2D array of shape (len(y_coords), len(x_coords))
-        u_data = df_u.iloc[1:, 30:300].values.astype(float)
+        u_data = df_u.iloc[20:, 30:300].values.astype(float)
 
         # Check that shapes match expectations
         ny = len(y_coords)
@@ -128,23 +140,21 @@ def main():
         # We will compute delta*(x) and theta(x) for each column
         delta_star_vals = []
         theta_vals      = []
-
+        u_e,i1 = get_u_e(40,file_vort,file_u)
         # Loop over each x-station (column)
         for ix in range(nx):
             # velocity profile in y at this x
             u_profile = u_data[:, ix]
             x_val = x_coords[ix]
             # Get free-stream velocity at this x
-            u_e = get_u_e(ix+30,file_vort,file_u)
-
+            u_e,i1 = get_u_e(ix+30,file_vort,file_u)
+            #u_e,i1 = get_u_e(ix+30,file_vort,file_u)
             # Compute boundary-layer parameters
             #print()
             #print("VEL PROFILE: ", u_profile)
             #print("Free stream: ", u_e)
             #print()
             dstar, th = compute_boundary_layer_params(y_coords_m, u_profile, u_e)
-            dstar = dstar * 1000.0
-            th = th * 1000.0
             delta_star_vals.append(dstar)
             theta_vals.append(th)
 
@@ -188,7 +198,7 @@ def main():
         #plt.show()
 
         # Save in the "plots" folder
-        plot_dir = "BL_plots_SC"
+        plot_dir = f"BL_plots_{ccsc}"
         outname = os.path.join(plot_dir, f"BL_Parameters_Case_{i}.png")
         plt.savefig(outname, dpi=150)
         plt.close()
