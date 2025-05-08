@@ -5,7 +5,7 @@ import os
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 from mpl_toolkits.mplot3d.art3d import Poly3DCollection
-import scipy as sp
+import scipy.fft as fft
 
 
 # Folder containing all plane files
@@ -142,9 +142,18 @@ for x in range(0,len(x_values),15):
 
     print(f"Saved: {out_path}")
 
-    fft = sp.fft((V_3D[10,x,:]/np.mean(U_3D[27,x,:]))/np.mean(V_3D[:,x,:]/np.mean(U_3D[27,x,:])))
-
-    print(fft)
+    # Number of sample points
+    N = 24
+    # sample spacing
+    T = 1/24
+    xx = np.linspace(0.0, N*T, N, endpoint=False)
+    y = (V_3D[15,x,:]/np.mean(U_3D[27,x,:]))/np.mean((V_3D[15,x,:]/np.mean(U_3D[27,x,:])))
+    yf = fft.fft(y)
+    xf = fft.fftfreq(N, T)[:N//2]
+    import matplotlib.pyplot as plt
+    plt.plot(xf, 2.0/N * np.abs(yf[0:N//2]))
+    plt.grid()
+    plt.show()
 
 
     Uc_3D[:,x,:] = Uc_3D[:,x,:]/np.mean(Uc_3D[27,x,:])
