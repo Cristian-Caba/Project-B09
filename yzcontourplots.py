@@ -6,6 +6,7 @@ import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 from mpl_toolkits.mplot3d.art3d import Poly3DCollection
 import scipy.fft as fft
+from matplotlib.ticker import MultipleLocator
 
 
 # Folder containing all plane files
@@ -145,15 +146,7 @@ for x in range(0,len(x_values),15):
     # Number of sample points
     N = 24
     # sample spacing
-    T = 1/24
-    xx = np.linspace(0.0, N*T, N, endpoint=False)
-    y = (V_3D[15,x,:]/np.mean(U_3D[27,x,:]))/np.mean((V_3D[15,x,:]/np.mean(U_3D[27,x,:])))
-    yf = fft.fft(y)
-    xf = fft.fftfreq(N, T)[:N//2]
-    import matplotlib.pyplot as plt
-    plt.plot(xf, 2.0/N * np.abs(yf[0:N//2]))
-    plt.grid()
-    plt.show()
+    T = 1
 
 
     Uc_3D[:,x,:] = Uc_3D[:,x,:]/np.mean(Uc_3D[27,x,:])
@@ -168,6 +161,32 @@ for x in range(0,len(x_values),15):
     for y in range(len(y_values)):
         stdlistCC = np.append(stdlistCC,np.std(Uc_3D[y,x,:]))
         stdlistSC = np.append(stdlistSC,np.std(U_3D[y,x,:]))
+
+        fig, axs = plt.subplots(1)
+
+        yfc = fft.fft(Uc_3D[y,x,:])/24
+        xfc = fft.fftfreq(N,T)[:N//2]
+        axs.plot(1/xfc,2*N*np.abs(yfc[0:N//2]),marker='o',label='CC')
+        yfs = fft.fft(U_3D[y,x,:])/24
+        xfs = fft.fftfreq(N,T)[:N//2] 
+        axs.plot(1/xfs,2*N*np.abs(yfs[0:N//2]),marker='x',label='SC')
+        axs.legend()
+        axs.grid()
+        axs.set_xlabel('Wavelength [mm]')
+        axs.set_ylabel('Amplitude [-]')
+        axs.xaxis.set_major_locator(MultipleLocator(1))  # more x ticks
+        axs.yaxis.set_major_locator(MultipleLocator(0.1))    # more y ticks
+        #axs.set_xticks(np.linspace(0, 24, 25))  # 9 ticks from 1 to 3
+        #axs.set_yticks(np.linspace(0, 2, 21))  # 9 ticks from 1 to 9
+
+        plt.suptitle(f"Wave Mode Shapes at x/c = {round(x_values[x],4)} and y = {round(y_values[y],4)}")
+        
+        plt.show()
+
+        print(1/xfs)
+        print(2*N*np.abs(yfs[0:N//2]))
+
+
 
     plt.clf()
 
