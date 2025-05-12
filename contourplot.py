@@ -184,7 +184,7 @@ def main():
 
             plt.xlabel("Dimensionless X (x/c_x)")
             plt.ylabel("Y [mm]")
-            plt.title(f"Dimensionless {raw_label}\nPlane={span_index}, Config={config}")
+            #plt.title(f"Dimensionless {raw_label}\nPlane={span_index}, Config={config}")
 
             # Fix axis range in dimensionless X, Y in [0..4]
             x_dim_min = np.min(convert_sx(np.array([x_min])))

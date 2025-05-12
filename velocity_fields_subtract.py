@@ -11,7 +11,7 @@ X_MIN, X_MAX = 120, 155          # mm
 Y_MIN, Y_MAX =   0,   4          # mm
 LEVELS       = np.linspace(-0.2, 0.2, 257)   # 256 equal bands
 NORM         = TwoSlopeNorm(vmin=-0.2, vcenter=0, vmax=0.2)
-FIGSIZE      = (10, 2.5)         # wide & thin
+FIGSIZE      = (15, 3)         # wide & thin
 OUT_DIR      = "images_diff"
 
 # ------------------------ helpers ------------------------------------------
@@ -73,7 +73,7 @@ def _plot(Xdim, Y, diff, title, out_png):
     ax.set_xlim(Xdim.min(), Xdim.max())
     ax.set_xlabel("Dimensionless X (x/c)")
     ax.set_ylabel("Y [mm]")
-    ax.set_title(title)
+    #ax.set_title(title)
 
     fig.savefig(out_png, dpi=300, bbox_inches='tight')
     plt.close(fig)
