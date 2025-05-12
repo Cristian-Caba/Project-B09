@@ -213,8 +213,12 @@ for x in range(0,len(x_values),15):
 
 
     plt.clf()
-    plt.contour(Z,Y,filterU_3D)
+    plt.contourf(Z,Y,filterU_3D,200,cmap='Spectral')
     plt.axes
+    plt.xlabel("z [mm]")
+    plt.ylabel("y [mm]")
+    plt.title(f'Filtered Velocity Contour Plot at x={round(x_values[x],3)}')
+    plt.colorbar()
     #plt.pcolormesh(Z,Y,filterU_3D,cmap='Spectral')
     plt.show()
 
@@ -225,7 +229,7 @@ for x in range(0,len(x_values),15):
     plt.plot(stdlistSC,y_values,label='Full Strip Config')
     plt.xlabel("Standard Deviation")
     plt.ylabel("y")
-    plt.title(f"Standard Deviation at x={x_values[x]}")
+    plt.title(f"Standard Deviation at x={round(x_values[x],3)}")
     plt.grid()
     plt.legend()
     plt.show()
