@@ -213,16 +213,27 @@ for x in range(0,len(x_values),15):
 
 
     plt.clf()
+    plt.figure(figsize=(15,3))
     plt.contourf(Z,Y,filterU_3D,200,cmap='Spectral')
     plt.axes
     plt.xlabel("z [mm]")
     plt.ylabel("y [mm]")
     plt.title(f'Filtered Velocity Contour Plot at x={round(x_values[x],3)}')
     plt.colorbar()
+    plt.tight_layout()
     #plt.pcolormesh(Z,Y,filterU_3D,cmap='Spectral')
-    plt.show()
+    
+    out_image_name = f"Filtered Velocity Contour Plotx{x}.png"
+    out_path = f'C:\\Users\\iangh\\Documents\\Python\\GroupB09github\\Project-B09-1\\PIV_planes_dimensionalised\\yz-images\\{out_image_name}'
+    plt.savefig(out_path, dpi=300, bbox_inches="tight")
+    plt.close()
+
+    print(f"Saved: {out_path}")
+
+
 
     plt.clf()
+    plt.figure(figsize=(15,3))
     plt.plot(stdlistCCfilter,y_values,label='Isolated Clean Config')
     plt.plot(stdlistSCfilter,y_values,label='Isolated Strip Config')
     plt.plot(stdlistCC,y_values,label='Full Clean Config')
@@ -232,7 +243,14 @@ for x in range(0,len(x_values),15):
     plt.title(f"Standard Deviation at x={round(x_values[x],3)}")
     plt.grid()
     plt.legend()
-    plt.show()
+    plt.tight_layout()
+
+    out_image_name = f"standarddeviation-x{x}.png"
+    out_path = f'C:\\Users\\iangh\\Documents\\Python\\GroupB09github\\Project-B09-1\\PIV_planes_dimensionalised\\yz-images\\{out_image_name}'
+    plt.savefig(out_path, dpi=300, bbox_inches="tight")
+    plt.close()
+
+    print(f"Saved: {out_path}")
 
 
 
