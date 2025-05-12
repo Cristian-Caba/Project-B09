@@ -138,7 +138,8 @@ def main():
 
             # MARKED CHANGE: Simply fix the color scale + 'bwr' colormap
             # Example: from -2.5 to +3.0
-            plt.figure()
+            plt.figure(figsize=(15,3))
+            plt.tight_layout()
             contour = plt.contourf(
                 X_mesh,
                 Y_mesh,
