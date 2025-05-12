@@ -5,7 +5,8 @@ import os
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 from mpl_toolkits.mplot3d.art3d import Poly3DCollection
-import scipy as sp
+import scipy.fft as fft
+from matplotlib.ticker import MultipleLocator
 
 
 # Folder containing all plane files
@@ -142,28 +143,99 @@ for x in range(0,len(x_values),15):
 
     print(f"Saved: {out_path}")
 
-    fft = sp.fft((V_3D[10,x,:]/np.mean(U_3D[27,x,:]))/np.mean(V_3D[:,x,:]/np.mean(U_3D[27,x,:])))
-
-    print(fft)
+    # Number of sample points
+    N = 24
+    # sample spacing
+    T = 1
 
 
     Uc_3D[:,x,:] = Uc_3D[:,x,:]/np.mean(Uc_3D[27,x,:])
     U_3D[:,x,:] = U_3D[:,x,:]/np.mean(U_3D[27,x,:])
+
+    Vc_3D[:,x,:] = Vc_3D[:,x,:]/np.mean(Uc_3D[27,x,:])
+    V_3D[:,x,:] = V_3D[:,x,:]/np.mean(U_3D[27,x,:])
     
     # U_3D[:,x,:] = (U_3D[:,x,:] - np.mean(U_3D[:,x,:]))/np.std(U_3D[:,x,:])
 
     stdlistCC = np.array([])
     stdlistSC = np.array([])
 
+    stdlistCCfilter = np.array([])
+    stdlistSCfilter = np.array([])
+
+    filterU_3D = np.zeros((len(y_values),24))
+    filterUc_3D = np.zeros((len(y_values),24))
+
 
     for y in range(len(y_values)):
         stdlistCC = np.append(stdlistCC,np.std(Uc_3D[y,x,:]))
         stdlistSC = np.append(stdlistSC,np.std(U_3D[y,x,:]))
 
-    plt.clf()
+        # fig, axs = plt.subplots(1)
 
-    plt.plot(stdlistCC,y_values,label='Clean Config')
-    plt.plot(stdlistSC,y_values,label='Strip Config')
+        yfc = fft.fft(Vc_3D[y,x,:])/24
+        xfc = fft.fftfreq(N,T)[:N//2]
+        # axs.plot(1/xfc,2*N*np.abs(yfc[0:N//2]),marker='o',label='CC')
+        yfs = fft.fft(V_3D[y,x,:])/24
+        xfs = fft.fftfreq(N,T)[:N//2] 
+        '''axs.plot(1/xfs,2*N*np.abs(yfs[0:N//2]),marker='x',label='SC')
+        axs.legend()
+        axs.grid()
+        axs.set_xlabel('Wavelength [mm]')
+        axs.set_ylabel('Amplitude [-]')
+        axs.xaxis.set_major_locator(MultipleLocator(1))  # more x ticks
+        axs.yaxis.set_major_locator(MultipleLocator(0.1))    # more y ticks
+        axs.set_xticks(np.linspace(0, 24, 25))  # 9 ticks from 1 to 3
+        axs.set_yticks(np.linspace(0, 2, 21))  # 9 ticks from 1 to 9'''
+
+        #plt.suptitle(f"Wave Mode Shapes at x/c = {round(x_values[x],4)} and y = {round(y_values[y],4)}")
+        
+        #plt.show()
+
+        yfs[0:3] = 0
+        yfs[4:len(yfs)] = 0
+        yfc[0:3] = 0
+        yfc[4:len(yfc)] = 0
+        #print(yfs)
+
+        inverseffts = fft.ifft(yfs*24)
+        inversefftc = fft.ifft(yfc*24)
+        #plt.clf()
+
+        #plt.plot(np.arange(1,24.01,1),inverseffts.real)
+        #plt.show()
+
+        filterU_3D[y] = inverseffts.real
+        filterUc_3D[y] = inversefftc.real
+
+        stdlistCCfilter = np.append(stdlistCCfilter, np.std(inversefftc.real))
+        stdlistSCfilter = np.append(stdlistSCfilter, np.std(inverseffts.real))
+
+
+    plt.clf()
+    plt.contour(Z,Y,filterU_3D)
+    plt.axes
+    #plt.pcolormesh(Z,Y,filterU_3D,cmap='Spectral')
+    plt.show()
+
+    plt.clf()
+    plt.plot(stdlistCCfilter,y_values,label='Isolated Clean Config')
+    plt.plot(stdlistSCfilter,y_values,label='Isolated Strip Config')
+    plt.plot(stdlistCC,y_values,label='Full Clean Config')
+    plt.plot(stdlistSC,y_values,label='Full Strip Config')
+    plt.xlabel("Standard Deviation")
+    plt.ylabel("y")
+    plt.title(f"Standard Deviation at x={x_values[x]}")
+    plt.grid()
+    plt.legend()
+    plt.show()
+
+
+
+    '''plt.clf()
+
+    plt.plot(stdlistCC,y_values,label='Full Clean Config')
+    plt.plot(stdlistSC,y_values,label='Full Strip Config')
     plt.xlabel("Standard Deviation")
     plt.ylabel("y")
     plt.title(f"Standard Deviation at x={x_values[x]}")
@@ -177,6 +249,6 @@ for x in range(0,len(x_values),15):
     plt.savefig(out_path, dpi=300, bbox_inches="tight")
     plt.close()
 
-    print(f"Saved: {out_path}")
+    print(f"Saved: {out_path}")'''
 
 
