@@ -54,7 +54,7 @@ def main():
 
     # Restrict domain
     x_min, x_max = 120, 155
-    y_min, y_max = 0, 4
+    y_min, y_max = 0, 3
 
     min_max_uv = [[0,1], [-0.12, 0]]
 
@@ -144,7 +144,7 @@ def main():
                 Y_mesh,
                 dimZ_sub,
                 levels=50,
-                cmap=cmaps[i],    # Blue-White-Red scheme
+                cmap='Spectral', #cmaps[i],     Blue-White-Red scheme
                 vmin=float(min_max_uv[i][0]),     # Lower limit
                 vmax=float(min_max_uv[i][1])      # Upper limit
             )

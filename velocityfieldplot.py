@@ -30,7 +30,7 @@ def main():
         V = dfv.values
 
         # Define the Y cutoff value
-        y_cutoff = 4  # Adjust as needed
+        y_cutoff = 3  # Adjust as needed
 
         # Filter the DataFrames based on the Y index
         dfu_filtered = dfu[dfu.index <= y_cutoff]
