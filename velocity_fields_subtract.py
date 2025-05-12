@@ -11,7 +11,7 @@ X_MIN, X_MAX = 120, 155          # mm
 Y_MIN, Y_MAX =   0,   4          # mm
 LEVELS       = np.linspace(-0.2, 0.2, 257)   # 256 equal bands
 NORM         = TwoSlopeNorm(vmin=-0.2, vcenter=0, vmax=0.2)
-FIGSIZE      = (15, 3)         # wide & thin
+FIGSIZE      = (9, 3)         # wide & thin
 OUT_DIR      = "images_diff"
 
 # ------------------------ helpers ------------------------------------------
