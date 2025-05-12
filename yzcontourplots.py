@@ -125,14 +125,16 @@ vmin = -vmax
 
 #ax.quiver(Y[::stepy,::stepx,:],X[::stepy,::stepx,:], Z[::stepy,::stepx,:], V_3D[::stepy,::stepx,:],U_3D[::stepy,::stepx,:], W_3D[::stepy,::stepx,:],length=0.1)
 for x in range(0,len(x_values),15):
+    plt.figure(figsize=(15,3))
     plt.pcolormesh(Z,Y,V_3D[:,x,:]/np.mean(U_3D[27,x,:]),cmap='Spectral') #vmin=vmin,vmax=vmax) # vmin=float(np.min(DiffV_3D)),vmax=float(np.max(DiffV_3D))
     plt.xlabel("z")
     plt.ylabel("y")
-    plt.xlim(0, 25)
+    plt.xlim(0, 23.5)
     plt.ylim(0, 3.5)
-    plt.title(f"Velocity Field Plot (SC) at x={x_values[x]}")
+    plt.title(f"Velocity Field Plot (SC) at x={round(x_values[x],4)}")
     plt.grid()
-    plt.colorbar()
+    plt.colorbar(label="u/u∞(x)")
+    plt.tight_layout()
     #plt.show()
 
     # Save image
@@ -218,8 +220,8 @@ for x in range(0,len(x_values),15):
     plt.axes
     plt.xlabel("z [mm]")
     plt.ylabel("y [mm]")
-    plt.title(f'Filtered Velocity Contour Plot at x={round(x_values[x],3)}')
-    plt.colorbar()
+    plt.title(f'Filtered Velocity Contour Plot at x={round(x_values[x],4)}')
+    plt.colorbar(label=f"u/u∞(x)")
     plt.tight_layout()
     #plt.pcolormesh(Z,Y,filterU_3D,cmap='Spectral')
     
@@ -233,14 +235,14 @@ for x in range(0,len(x_values),15):
 
 
     plt.clf()
-    plt.figure(figsize=(15,3))
+    plt.figure(figsize=(6,3))
     plt.plot(stdlistCCfilter,y_values,label='Isolated Clean Config')
     plt.plot(stdlistSCfilter,y_values,label='Isolated Strip Config')
     plt.plot(stdlistCC,y_values,label='Full Clean Config')
     plt.plot(stdlistSC,y_values,label='Full Strip Config')
     plt.xlabel("Standard Deviation")
     plt.ylabel("y")
-    plt.title(f"Standard Deviation at x={round(x_values[x],3)}")
+    plt.title(f"Standard Deviation at x={round(x_values[x],4)}")
     plt.grid()
     plt.legend()
     plt.tight_layout()
