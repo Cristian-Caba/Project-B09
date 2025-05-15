@@ -7,6 +7,7 @@ from mpl_toolkits.mplot3d import Axes3D
 from mpl_toolkits.mplot3d.art3d import Poly3DCollection
 import scipy.fft as fft
 from matplotlib.ticker import MultipleLocator
+import matplotlib.patches as patches
 
 
 # Folder containing all plane files
@@ -121,29 +122,35 @@ Diff_3D = Cc_3D - C_3D
 vmax = np.max(np.abs(U_3D))  # Max absolute value
 vmin = -vmax
 
+maxCCfull = np.array([])
+maxSCfull = np.array([])
+maxCCiso = np.array([])
+maxSCiso = np.array([])
+
 
 
 #ax.quiver(Y[::stepy,::stepx,:],X[::stepy,::stepx,:], Z[::stepy,::stepx,:], V_3D[::stepy,::stepx,:],U_3D[::stepy,::stepx,:], W_3D[::stepy,::stepx,:],length=0.1)
-for x in range(0,len(x_values),15):
-    plt.figure(figsize=(15,3))
-    plt.pcolormesh(Z,Y,V_3D[:,x,:]/np.mean(U_3D[27,x,:]),cmap='Spectral') #vmin=vmin,vmax=vmax) # vmin=float(np.min(DiffV_3D)),vmax=float(np.max(DiffV_3D))
-    plt.xlabel("z")
-    plt.ylabel("y")
+for x in range(195,len(x_values),15):
+    plt.figure(figsize=(12,3))
+    plt.pcolormesh(Z,Y,U_3D[:,x,:]/np.mean(U_3D[27,x,:]),cmap='Spectral') #vmin=vmin,vmax=vmax) # vmin=float(np.min(DiffV_3D)),vmax=float(np.max(DiffV_3D))
+    plt.xlabel("z [mm]")
+    plt.ylabel("y [mm]")
     plt.xlim(0, 23.5)
     plt.ylim(0, 3.5)
-    plt.title(f"Velocity Field Plot (SC) at x={round(x_values[x],4)}")
+    #plt.title(f"U Velocity Field Plot (SC) at x/$c_x$={round(x_values[x],4)}")
     plt.grid()
     plt.colorbar(label="u/u∞(x)")
     plt.tight_layout()
+    plt.close
     #plt.show()
-
+    '''
     # Save image
     out_image_name = f"yzvelocityfield-x{x}.png"
     out_path = f'C:\\Users\\iangh\\Documents\\Python\\GroupB09github\\Project-B09-1\\PIV_planes_dimensionalised\\yz-images\\{out_image_name}'
     plt.savefig(out_path, dpi=300, bbox_inches="tight")
     plt.close()
 
-    print(f"Saved: {out_path}")
+    print(f"Saved: {out_path}")'''
 
     # Number of sample points
     N = 24
@@ -172,26 +179,36 @@ for x in range(0,len(x_values),15):
     for y in range(len(y_values)):
         stdlistCC = np.append(stdlistCC,np.std(Uc_3D[y,x,:]))
         stdlistSC = np.append(stdlistSC,np.std(U_3D[y,x,:]))
-
-        # fig, axs = plt.subplots(1)
-
-        yfc = fft.fft(Vc_3D[y,x,:])/24
-        xfc = fft.fftfreq(N,T)[:N//2]
-        # axs.plot(1/xfc,2*N*np.abs(yfc[0:N//2]),marker='o',label='CC')
-        yfs = fft.fft(V_3D[y,x,:])/24
-        xfs = fft.fftfreq(N,T)[:N//2] 
-        '''axs.plot(1/xfs,2*N*np.abs(yfs[0:N//2]),marker='x',label='SC')
-        axs.legend()
-        axs.grid()
-        axs.set_xlabel('Wavelength [mm]')
-        axs.set_ylabel('Amplitude [-]')
-        axs.xaxis.set_major_locator(MultipleLocator(1))  # more x ticks
-        axs.yaxis.set_major_locator(MultipleLocator(0.1))    # more y ticks
-        axs.set_xticks(np.linspace(0, 24, 25))  # 9 ticks from 1 to 3
-        axs.set_yticks(np.linspace(0, 2, 21))  # 9 ticks from 1 to 9'''
-
-        #plt.suptitle(f"Wave Mode Shapes at x/c = {round(x_values[x],4)} and y = {round(y_values[y],4)}")
         
+        plt.clf()
+        
+        yfc = fft.fft(Uc_3D[y,x,:])/24
+        xfc = fft.fftfreq(N,T)[:N//2]
+        plt.figure(figsize=(9,3))
+        plt.plot(1/xfc,2*N*np.abs(yfc[0:N//2]),marker='o',label='CC')
+        yfs = fft.fft(U_3D[y,x,:])/24
+        xfs = fft.fftfreq(N,T)[:N//2] 
+
+        
+        plt.plot(1/xfs,2*N*np.abs(yfs[0:N//2]),marker='x',label='SC')
+        plt.legend()
+        plt.grid()
+        plt.xlabel('Wavelength [mm]')
+        plt.ylabel('Amplitude [-]')
+        plt.gca().xaxis.set_major_locator(MultipleLocator(1))  # more x ticks
+        plt.gca().yaxis.set_major_locator(MultipleLocator(0.2))    # more y ticks
+
+        #plt.suptitle(f"Wavelength-Amplitude plots at x/c = {round(x_values[x],4)} and y = {round(y_values[y],4)}")
+
+        plt.tight_layout()
+        
+        out_image_name = f"Wave-amp-x{x}y{y}.png"
+        out_path = f'C:\\Users\\iangh\\Documents\\Python\\GroupB09github\\Project-B09-1\\PIV_planes_dimensionalised\\yz-images\\{out_image_name}'
+        plt.savefig(out_path, dpi=300, bbox_inches="tight")
+        plt.close()
+
+        print(f"Saved: {out_path}")
+
         #plt.show()
 
         yfs[0:3] = 0
@@ -202,7 +219,7 @@ for x in range(0,len(x_values),15):
 
         inverseffts = fft.ifft(yfs*24)
         inversefftc = fft.ifft(yfc*24)
-        #plt.clf()
+        # plt.clf()
 
         #plt.plot(np.arange(1,24.01,1),inverseffts.real)
         #plt.show()
@@ -212,63 +229,22 @@ for x in range(0,len(x_values),15):
 
         stdlistCCfilter = np.append(stdlistCCfilter, np.std(inversefftc.real))
         stdlistSCfilter = np.append(stdlistSCfilter, np.std(inverseffts.real))
+        plt.close()
 
 
     plt.clf()
-    plt.figure(figsize=(15,3))
+    plt.figure(figsize=(9,3))
     plt.contourf(Z,Y,filterU_3D,200,cmap='Spectral')
     plt.axes
     plt.xlabel("z [mm]")
     plt.ylabel("y [mm]")
-    plt.title(f'Filtered Velocity Contour Plot at x={round(x_values[x],4)}')
+    #plt.title(f'Filtered Velocity Contour Plot at x/$c_x$={round(x_values[x],4)}')
     plt.colorbar(label=f"u/u∞(x)")
     plt.tight_layout()
+    plt.close
     #plt.pcolormesh(Z,Y,filterU_3D,cmap='Spectral')
-    
+    '''
     out_image_name = f"Filtered Velocity Contour Plotx{x}.png"
-    out_path = f'C:\\Users\\iangh\\Documents\\Python\\GroupB09github\\Project-B09-1\\PIV_planes_dimensionalised\\yz-images\\{out_image_name}'
-    plt.savefig(out_path, dpi=300, bbox_inches="tight")
-    plt.close()
-
-    print(f"Saved: {out_path}")
-
-
-
-    plt.clf()
-    plt.figure(figsize=(6,3))
-    plt.plot(stdlistCCfilter,y_values,label='Isolated Clean Config')
-    plt.plot(stdlistSCfilter,y_values,label='Isolated Strip Config')
-    plt.plot(stdlistCC,y_values,label='Full Clean Config')
-    plt.plot(stdlistSC,y_values,label='Full Strip Config')
-    plt.xlabel("Standard Deviation")
-    plt.ylabel("y")
-    plt.title(f"Standard Deviation at x={round(x_values[x],4)}")
-    plt.grid()
-    plt.legend()
-    plt.tight_layout()
-
-    out_image_name = f"standarddeviation-x{x}.png"
-    out_path = f'C:\\Users\\iangh\\Documents\\Python\\GroupB09github\\Project-B09-1\\PIV_planes_dimensionalised\\yz-images\\{out_image_name}'
-    plt.savefig(out_path, dpi=300, bbox_inches="tight")
-    plt.close()
-
-    print(f"Saved: {out_path}")
-
-
-
-    '''plt.clf()
-
-    plt.plot(stdlistCC,y_values,label='Full Clean Config')
-    plt.plot(stdlistSC,y_values,label='Full Strip Config')
-    plt.xlabel("Standard Deviation")
-    plt.ylabel("y")
-    plt.title(f"Standard Deviation at x={x_values[x]}")
-    plt.grid()
-    plt.legend()
-    #plt.show()
-
-    # Save image
-    out_image_name = f"standarddeviation-x{x}.png"
     out_path = f'C:\\Users\\iangh\\Documents\\Python\\GroupB09github\\Project-B09-1\\PIV_planes_dimensionalised\\yz-images\\{out_image_name}'
     plt.savefig(out_path, dpi=300, bbox_inches="tight")
     plt.close()
@@ -276,3 +252,74 @@ for x in range(0,len(x_values),15):
     print(f"Saved: {out_path}")'''
 
 
+    
+    plt.clf()
+    plt.figure(figsize=(9,3))
+    plt.plot(stdlistCC,y_values,label='Full Clean Config')
+    plt.plot(stdlistSC,y_values,label='Full Strip Config')
+    plt.plot(stdlistCCfilter,y_values,label='Isolated Clean Config')
+    plt.plot(stdlistSCfilter,y_values,label='Isolated Strip Config')
+    plt.xlabel("Standard Deviation [-]")
+    plt.ylabel("y [mm]")
+    #plt.title(f"Standard Deviation at x/$c_x$={round(x_values[x],4)}")
+    plt.grid()
+    plt.legend()
+    plt.tight_layout()
+
+    maxCCfull = np.append(maxCCfull,max(stdlistCC))
+    maxSCfull = np.append(maxSCfull,max(stdlistSC))
+    maxCCiso = np.append(maxCCiso,max(stdlistCCfilter))
+    maxSCiso = np.append(maxSCiso,max(stdlistSCfilter))
+
+    out_image_name = f"standarddeviation-x{x}.png"
+    out_path = f'C:\\Users\\iangh\\Documents\\Python\\GroupB09github\\Project-B09-1\\PIV_planes_dimensionalised\\yz-images\\{out_image_name}'
+    plt.savefig(out_path, dpi=300, bbox_inches="tight")
+    plt.close()
+
+    print(f"Saved: {out_path}")
+    
+print(x_values[195])
+print(y_values[3])
+'''
+plt.clf()
+plt.figure(figsize=(9,3))
+plt.plot(x_values,maxCCfull,label='Full Clean Config')
+plt.plot(x_values,maxSCfull,label='Full Strip Config')
+plt.plot(x_values,maxCCiso,label='Isolated Clean Config')
+plt.plot(x_values,maxSCiso,label='Isolated Strip Config')
+plt.xlabel("x/$c_x$ [-]")
+plt.ylabel("Maximum Standard Deviation [-]")
+# Convert lengths from mm to dimensionless for the X direction
+width_dim = 1.4/900
+spacing_dim = 9.2/900
+height_mm = 0.005  # Y in mm
+
+# Left edge of the first rectangle is x/c=0.125
+rectLeft = [0.125]  # dimensionless
+
+center0 = rectLeft[0] + width_dim/2
+# Build left edges for rectangles #2..#5
+for k in range(1, 4):
+    center_k = center0 + k*spacing_dim
+    left_k = center_k - width_dim/2
+    rectLeft.append(left_k)
+
+# Add each rectangle (all black)
+for left in rectLeft:
+    rect = patches.Rectangle(
+        (left, 0.0),  # bottom-left corner
+        width_dim,    # dimensionless width
+        height_mm,    # height in mm
+        color='black'
+    )
+    plt.gca().add_patch(rect)
+plt.legend()
+plt.tight_layout()
+
+
+out_image_name = f"maxstd-x.png"
+out_path = f'C:\\Users\\iangh\\Documents\\Python\\GroupB09github\\Project-B09-1\\PIV_planes_dimensionalised\\yz-images\\{out_image_name}'
+plt.savefig(out_path, dpi=300, bbox_inches="tight")
+plt.close()
+
+print(f"Saved: {out_path}")'''
