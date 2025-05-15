@@ -7,7 +7,7 @@ vmin=9999999.3
 vmax=-80000.3
 # fig, axes = plt.subplots(figsize=(12, 18))
 # axes = axes.flatten()
-ccsc="SC"
+ccsc="CC"
 
 cmin=-50
 cmax=0
@@ -38,7 +38,7 @@ for i in range (0,24):
     Z = np.clip(z_sliced, cmin, cmax)
     
     
-    fig, axes = plt.subplots(figsize=(6, 4))
+    fig, axes = plt.subplots(figsize=(9, 3))
     c = axes.contourf(X, Y, Z, levels=50, cmap='Spectral',vmin=cmin,vmax=cmax)
     width_dim = 1.4/900
     spacing_dim = 9.2/900
@@ -64,13 +64,14 @@ for i in range (0,24):
         )
         axes.add_patch(rect)
     
-    axes.set_title(f"Plane {i+1}")
-    axes.set_xlabel('Chord')
-    axes.set_ylabel('Height')
+    #axes.set_title(f"Plane {i+1}")
+    axes.set_xlabel('$x/c_x$')
+    axes.set_ylabel('y')
     axes.set_xlim(0.12,0.158)
     axes.set_ylim(0,3)
     levels = np.linspace(cmin, cmax, 10)
-    fig.colorbar(c, ax=axes, orientation='vertical', fraction=0.02, pad=0.04)
+    fig.colorbar(c, ax=axes, orientation='vertical', fraction=0.02, pad=0.04,label="ξ [1/s]")
+    plt.tight_layout()
     plt.savefig(f"VorticityPlots/Case_{ccsc}_Span_{i+1}.png")
     plt.close(fig)
 
