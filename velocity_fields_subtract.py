@@ -71,8 +71,8 @@ def _plot(Xdim, Y, diff, title, out_png):
         )
 
     ax.set_xlim(Xdim.min(), Xdim.max())
-    ax.set_xlabel("Dimensionless X (x/c)")
-    ax.set_ylabel("Y [mm]")
+    ax.set_xlabel("$x/c_x$")
+    ax.set_ylabel("y [mm]")
     #ax.set_title(title)
 
     fig.savefig(out_png, dpi=300, bbox_inches='tight')

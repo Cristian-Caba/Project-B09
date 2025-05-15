@@ -274,8 +274,8 @@ def main():
 
             plt.colorbar(contour, label=f"{raw_label}/u∞(x)")
 
-            plt.xlabel("Dimensionless X (x/c_x)")
-            plt.ylabel("Y [mm]")
+            plt.xlabel("$x/c_x$")
+            plt.ylabel("y [mm]")
             #plt.title(f"Dimensionless {raw_label}\nPlane={span_index}, Config={config}")
 
             # Fix axis range in dimensionless X, Y in [0..4]
