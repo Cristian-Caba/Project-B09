@@ -5,6 +5,8 @@ import os
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
+from matplotlib.gridspec import GridSpec
+import matplotlib.patches as patches
 
 from dimensionalization import convert_sx  # interpret x-values as arc-length s => dimensionless (x/c_x)
 
@@ -41,12 +43,87 @@ def extract_freestream_u(folder, config, span_index, y_fs=3.5):
     row_fs = row_fs.sort_index()
     return row_fs
 
+def create_compound_plots(all_data, config, save_folder, min_max_uv):
+    """
+    Create compound plots for a given configuration (CC or SC)
+    all_data: Dictionary containing processed data for all span indices
+    """
+    # Exclude span 25 and sort remaining spans
+    span_indices = sorted([idx for idx in all_data.keys() if idx != 25])
+    if not span_indices:  # Skip if no data for this configuration
+        print(f"No data available for {config} configuration (excluding span 25)")
+        return
+        
+    num_spans = len(span_indices)
+    
+    for component in ['u', 'v']:
+        # Check if we have data for this component
+        if component not in all_data[span_indices[0]]:
+            print(f"No {component} data available for {config} configuration")
+            continue
+            
+        # Create figure with 6x4 grid
+        fig = plt.figure(figsize=(20, 24))
+        gs = GridSpec(6, 4, figure=fig)
+        
+        for i, span_idx in enumerate(span_indices):
+            row = i // 4
+            col = i % 4
+            ax = fig.add_subplot(gs[row, col])
+            
+            data = all_data[span_idx][component]
+            contour = ax.contourf(
+                data['X_mesh'],
+                data['Y_mesh'],
+                data['dimZ_sub'],
+                levels=50,
+                cmap='Spectral',
+                vmin=float(min_max_uv[0 if component == 'u' else 1][0]),
+                vmax=float(min_max_uv[0 if component == 'u' else 1][1])
+            )
+            
+            if config == "SC":
+                width_dim = 1.4/900
+                spacing_dim = 9.2/900
+                height_mm = 0.17
+                rectLeft = [0.125]
+                center0 = rectLeft[0] + width_dim/2
+                for k in range(1, 5):
+                    center_k = center0 + k*spacing_dim
+                    left_k = center_k - width_dim/2
+                    rectLeft.append(left_k)
+                
+                for left in rectLeft:
+                    rect = patches.Rectangle(
+                        (left, 0.0),
+                        width_dim,
+                        height_mm,
+                        color='black'
+                    )
+                    ax.add_patch(rect)
+            
+            ax.set_title(f"Span {span_idx}")
+            ax.set_xlabel("x/c_x" if row == 5 else "")
+            ax.set_ylabel("Y [mm]" if col == 0 else "")
+            ax.set_xlim([data['x_dim_min'], data['x_dim_max']])
+            ax.set_ylim([data['y_min'], data['y_max']])
+        
+        # Add colorbar
+        cbar_ax = fig.add_axes([0.92, 0.15, 0.02, 0.7])
+        fig.colorbar(contour, cax=cbar_ax, label=f"{component}/u∞(x)")
+        
+        plt.tight_layout(rect=[0, 0, 0.9, 1])
+        out_path = os.path.join(save_folder, f"Compound_{config}_{component}.png")
+        plt.savefig(out_path, dpi=300, bbox_inches="tight")
+        plt.close()
+        print(f"Saved compound plot: {out_path}")
 ###############################################################################
 def main():
     folder_path = "PIV_planes"
 
     # Patterns for _u.csv, _v.csv, _UV.csv
     file_patterns = ["*_u.csv", "*_v.csv"]
+    compound_data = {'CC': {}, 'SC': {}}
 
     # Subfolder for dimensionless images
     save_folder = os.path.join(folder_path, "images_dimless_x")
@@ -135,6 +212,21 @@ def main():
                 raw_label = "v"
             else:
                 raw_label = "Velocity Mag"
+            if span_index not in compound_data[config]:
+                compound_data[config][span_index] = {}
+            
+            x_dim_min = np.min(convert_sx(np.array([x_min])))
+            x_dim_max = np.min(convert_sx(np.array([x_max])))
+            
+            compound_data[config][span_index][raw_label] = {
+                'X_mesh': X_mesh,
+                'Y_mesh': Y_mesh,
+                'dimZ_sub': dimZ_sub,
+                'x_dim_min': x_dim_min,
+                'x_dim_max': x_dim_max,
+                'y_min': y_min,
+                'y_max': y_max
+            }
 
             # MARKED CHANGE: Simply fix the color scale + 'bwr' colormap
             # Example: from -2.5 to +3.0
@@ -198,6 +290,9 @@ def main():
             plt.close()
             print(f"Saved dimensionless velocity + dimensionless X plot: {out_path}")
         i += 1
+    for config in ['CC', 'SC']:
+        if compound_data[config]:  # Only if we have data for this configuration
+            create_compound_plots(compound_data[config], config, save_folder, min_max_uv)
 
 
 if __name__ == "__main__":
